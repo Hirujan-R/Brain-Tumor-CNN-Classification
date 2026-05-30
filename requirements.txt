@@ -1,0 +1,38 @@
+# Core ML
+torch
+torchvision
+torchaudio
+
+# Data handling
+numpy
+pandas
+scikit-learn
+
+# Image processing
+opencv-python
+Pillow
+
+# Visualization
+matplotlib
+seaborn
+
+# Experiment tracking
+mlflow
+
+# Cloud (S3)
+boto3
+s3fs
+
+# Config handling
+pyyaml
+
+# API (for deployment later)
+fastapi
+uvicorn
+
+# Notebook support
+jupyter
+ipykernel
+
+# Utilities
+tqdm

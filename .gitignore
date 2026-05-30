@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Data (VERY IMPORTANT)
+data/raw/
+data/processed/
+data/splits/
+
+# Model artifacts (don’t store large files in git)
+models/checkpoints/
+models/final/
+
+# MLflow
+mlruns/
+experiments/mlflow/
+
+# Environment variables (S3 keys etc.)
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Docker volumes (optional)
+*.tar
+*.zip
