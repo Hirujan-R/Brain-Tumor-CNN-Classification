@@ -20,13 +20,13 @@ logs/
 
 # Data (ONLY raw local copies, not DVC-managed outputs)
 data/raw/*
+data/interim/*
 data/processed/*
 data/splits/*
 
 # BUT keep DVC metadata files
 !*.dvc
-dvc.lock
-dvc.yaml
+
 
 # Model artifacts
 models/checkpoints/

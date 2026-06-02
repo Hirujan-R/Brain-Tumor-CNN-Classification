@@ -1,0 +1,16 @@
+schema: '2.0'
+stages:
+  extract:
+    cmd: python src/data/extract_zips.py
+    deps:
+    - path: data/raw/zips
+      hash: md5
+      md5: 211187403ede6a74fb3f7374899403d2.dir
+      size: 879493326
+      nfiles: 4
+    outs:
+    - path: data/interim/extracted_mat
+      hash: md5
+      md5: bf5af92ba93c01b77a5e31faf5e6b244.dir
+      size: 922084750
+      nfiles: 3064

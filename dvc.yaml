@@ -1,0 +1,7 @@
+stages:
+  extract:
+    cmd: python src/data/extract_zips.py
+    deps:
+      - data/raw/zips
+    outs:
+      - data/interim/extracted_mat
