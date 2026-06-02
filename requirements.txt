@@ -17,11 +17,8 @@ matplotlib
 seaborn
 
 # Experiment tracking
+dvc[s3]
 mlflow
-
-# Cloud (S3)
-boto3
-s3fs
 
 # Config handling
 pyyaml
