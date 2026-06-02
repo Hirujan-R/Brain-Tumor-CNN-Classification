@@ -33,3 +33,5 @@ ipykernel
 
 # Utilities
 tqdm
+
+h5py

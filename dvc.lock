@@ -14,3 +14,33 @@ stages:
       md5: bf5af92ba93c01b77a5e31faf5e6b244.dir
       size: 922084750
       nfiles: 3064
+  ingest:
+    cmd: python src/data/ingestion/ingest.py
+    deps:
+    - path: data/interim/extracted_mat
+      hash: md5
+      md5: bf5af92ba93c01b77a5e31faf5e6b244.dir
+      size: 922084750
+      nfiles: 3064
+    - path: src/data/ingestion
+      hash: md5
+      md5: bf868d70b8c3533f142b549ddad8f541.dir
+      size: 25822
+      nfiles: 16
+    outs:
+    - path: data/ingested/dataset_summary.json
+      hash: md5
+      md5: 9798dc5c43b5f02136f1d71d093a502f
+      size: 69
+    - path: data/ingested/index.csv
+      hash: md5
+      md5: 7d6c88e5bcf3b4e697d66b6209b2d54e
+      size: 377769
+    - path: data/ingested/label_stats.json
+      hash: md5
+      md5: 50c190d17c1794f1e4d8a076b559329e
+      size: 39
+    - path: data/ingested/patient_map.json
+      hash: md5
+      md5: 3795ebb4012a0a4a758ed137734cac34
+      size: 371596

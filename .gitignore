@@ -21,6 +21,7 @@ logs/
 # Data (ONLY raw local copies, not DVC-managed outputs)
 data/raw/*
 data/interim/*
+data/ingested/*
 data/processed/*
 data/splits/*
 

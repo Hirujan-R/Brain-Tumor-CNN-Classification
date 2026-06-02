@@ -5,3 +5,14 @@ stages:
       - data/raw/zips
     outs:
       - data/interim/extracted_mat
+
+  ingest:
+    cmd: python src/data/ingestion/ingest.py
+    deps:
+      - src/data/ingestion
+      - data/interim/extracted_mat
+    outs:
+      - data/ingested/index.csv
+      - data/ingested/patient_map.json
+      - data/ingested/label_stats.json
+      - data/ingested/dataset_summary.json
