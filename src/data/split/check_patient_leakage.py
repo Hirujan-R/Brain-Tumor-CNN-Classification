@@ -1,108 +1,44 @@
-# from pathlib import Path
+import pandas as pd
 
-# import h5py
-# import numpy as np
-# import pandas as pd
+N_FOLDS = 5
+SPLIT_DIR = "data/splits"
 
+val_dfs = []
+leakage_cases = []
 
-# INDEX_PATH = Path("data/ingested/index.csv")
-# CVIND_PATH = Path("data/splits/cvind.mat")
+for fold in range(N_FOLDS):
+    train = pd.read_csv(f"{SPLIT_DIR}/fold_{fold}_train.csv")
+    val = pd.read_csv(f"{SPLIT_DIR}/fold_{fold}_val.csv")
 
+    train_patients = set(train["patient_id"])
+    val_patients = set(val["patient_id"])
+    overlap = train_patients & val_patients
 
-# def load_folds():
+    if overlap:
+        leakage_cases.extend((fold, pid) for pid in sorted(overlap))
 
-#     with h5py.File(CVIND_PATH, "r") as f:
+    val = val.copy()
+    val["validation_fold"] = fold
+    val_dfs.append(val)
 
-#         folds = np.array(
-#             f["cvind"]
-#         )
+val_df = pd.concat(val_dfs, ignore_index=True)
+patient_fold_counts = val_df.groupby("patient_id")["validation_fold"].nunique()
+multi_val_fold_patients = patient_fold_counts[patient_fold_counts > 1]
 
-#     folds = folds.squeeze()
-#     folds = folds.astype(int)
+sample_fold_counts = val_df.groupby("filepath")["validation_fold"].nunique()
+multi_val_fold_samples = sample_fold_counts[sample_fold_counts > 1]
 
-#     return folds
+print("Patients:", val_df["patient_id"].nunique())
+print("Validation samples:", len(val_df))
+print("Train/val leakage cases:", len(leakage_cases))
+print("Patients in multiple validation folds:", len(multi_val_fold_patients))
+print("Samples in multiple validation folds:", len(multi_val_fold_samples))
 
+if leakage_cases:
+    print("Example train/val leakage:", leakage_cases[:10])
 
-# def main():
+if not multi_val_fold_patients.empty:
+    print("Example multi-fold patients:", multi_val_fold_patients.head(10).to_dict())
 
-#     df = pd.read_csv(INDEX_PATH)
-
-#     folds = load_folds()
-
-#     df["fold"] = folds
-
-#     leaking_patients = []
-
-#     for pid, group in df.groupby("patient_id"):
-
-#         unique_folds = group["fold"].unique()
-
-#         if len(unique_folds) > 1:
-
-#             leaking_patients.append(
-#                 {
-#                     "pid": pid,
-#                     "folds": unique_folds.tolist(),
-#                     "samples": len(group),
-#                 }
-#             )
-
-#     print(
-#         f"Patients: {df['patient_id'].nunique()}"
-#     )
-
-#     print(
-#         f"Leakage cases: {len(leaking_patients)}"
-#     )
-
-#     if leaking_patients:
-
-#         print(
-#             "\nFirst 10 leakage examples:"
-#         )
-
-#         for item in leaking_patients[:10]:
-
-#             print(item)
-
-#     else:
-
-#         print(
-#             "\nNo patient leakage detected."
-#         )
-
-# import pandas as pd
-
-# df = pd.read_csv("data/ingested/index.csv")
-
-# print(df.columns.tolist())
-
-# for col in df.columns:
-#     print(col, df[col].nunique())
-
-# if __name__ == "__main__":
-#     main()
-
-import h5py
-from pathlib import Path
-
-sample = next(
-    Path("data/interim/extracted_mat").rglob("*.mat")
-)
-
-print(sample)
-
-with h5py.File(sample, "r") as f:
-
-    print(list(f.keys()))
-
-    cjdata = f["cjdata"]
-
-    print(list(cjdata.keys()))
-
-    pid_obj = cjdata["PID"]
-
-    print("PID shape:", pid_obj.shape)
-    print("PID dtype:", pid_obj.dtype)
-
-    print("PID raw:", pid_obj[()])
+if leakage_cases or not multi_val_fold_patients.empty or not multi_val_fold_samples.empty:
+    raise SystemExit(1)

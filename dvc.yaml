@@ -16,3 +16,37 @@ stages:
       - data/ingested/patient_map.json
       - data/ingested/label_stats.json
       - data/ingested/dataset_summary.json
+
+  split:
+    cmd: python src/data/split/cv_split.py
+    deps:
+      - src/data/split/cv_split.py
+      - data/ingested/index.csv
+      - data/splits/cvind.mat
+    outs:
+      - data/splits/fold_0_train.csv
+      - data/splits/fold_0_val.csv
+      - data/splits/fold_1_train.csv
+      - data/splits/fold_1_val.csv
+      - data/splits/fold_2_train.csv
+      - data/splits/fold_2_val.csv
+      - data/splits/fold_3_train.csv
+      - data/splits/fold_3_val.csv
+      - data/splits/fold_4_train.csv
+      - data/splits/fold_4_val.csv
+      - data/splits/split_report.json
+
+  validate_split:
+    cmd: python src/data/split/check_patient_leakage.py
+    deps:
+      - src/data/split/check_patient_leakage.py
+      - data/splits/fold_0_train.csv
+      - data/splits/fold_0_val.csv
+      - data/splits/fold_1_train.csv
+      - data/splits/fold_1_val.csv
+      - data/splits/fold_2_train.csv
+      - data/splits/fold_2_val.csv
+      - data/splits/fold_3_train.csv
+      - data/splits/fold_3_val.csv
+      - data/splits/fold_4_train.csv
+      - data/splits/fold_4_val.csv

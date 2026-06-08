@@ -44,3 +44,110 @@ stages:
       hash: md5
       md5: 882cc98c8cde193b1e8704a305a90af3
       size: 328011
+  split:
+    cmd: python src/data/split/cv_split.py
+    deps:
+    - path: data/ingested/index.csv
+      hash: md5
+      md5: 2ca8190f9cecfd50788f2524a908fd50
+      size: 387791
+    - path: data/splits/cvind.mat
+      hash: md5
+      md5: 5ea82eb3212c9fcb84290ccf0beb486d
+      size: 5736
+    - path: src/data/split/cv_split.py
+      hash: md5
+      md5: 49e1c79396c5fc651bf6c76c19e7416b
+      size: 7774
+    outs:
+    - path: data/splits/fold_0_train.csv
+      hash: md5
+      md5: a0ecb57affd2219fa51c16afb9b525c4
+      size: 324261
+    - path: data/splits/fold_0_val.csv
+      hash: md5
+      md5: 5eae7c228d1c0f6dfab7e15ab1d076b0
+      size: 69715
+    - path: data/splits/fold_1_train.csv
+      hash: md5
+      md5: 5c446ba709a13226bf5ee22e39256407
+      size: 306563
+    - path: data/splits/fold_1_val.csv
+      hash: md5
+      md5: 1e5a60ff2014e570717c3db26d072c09
+      size: 87413
+    - path: data/splits/fold_2_train.csv
+      hash: md5
+      md5: c89b3bd6273b5f35af92c3b30d6e58aa
+      size: 320591
+    - path: data/splits/fold_2_val.csv
+      hash: md5
+      md5: 92534807e7965ecdfb5143785d58151f
+      size: 73385
+    - path: data/splits/fold_3_train.csv
+      hash: md5
+      md5: c571dec0b53baea19127414348039709
+      size: 313025
+    - path: data/splits/fold_3_val.csv
+      hash: md5
+      md5: a96b1903c992a2bdd11f1fd57aa9f6f6
+      size: 80951
+    - path: data/splits/fold_4_train.csv
+      hash: md5
+      md5: fc2d3f7b490354b010c0f1a872ddb1f0
+      size: 311308
+    - path: data/splits/fold_4_val.csv
+      hash: md5
+      md5: 2280acb805a439663eb4e8a756e42c1a
+      size: 82668
+    - path: data/splits/split_report.json
+      hash: md5
+      md5: b23c3439df7f7c7a5b6b6aa8d44eb9e1
+      size: 8949
+  validate_split:
+    cmd: python src/data/split/check_patient_leakage.py
+    deps:
+    - path: data/splits/fold_0_train.csv
+      hash: md5
+      md5: a0ecb57affd2219fa51c16afb9b525c4
+      size: 324261
+    - path: data/splits/fold_0_val.csv
+      hash: md5
+      md5: 5eae7c228d1c0f6dfab7e15ab1d076b0
+      size: 69715
+    - path: data/splits/fold_1_train.csv
+      hash: md5
+      md5: 5c446ba709a13226bf5ee22e39256407
+      size: 306563
+    - path: data/splits/fold_1_val.csv
+      hash: md5
+      md5: 1e5a60ff2014e570717c3db26d072c09
+      size: 87413
+    - path: data/splits/fold_2_train.csv
+      hash: md5
+      md5: c89b3bd6273b5f35af92c3b30d6e58aa
+      size: 320591
+    - path: data/splits/fold_2_val.csv
+      hash: md5
+      md5: 92534807e7965ecdfb5143785d58151f
+      size: 73385
+    - path: data/splits/fold_3_train.csv
+      hash: md5
+      md5: c571dec0b53baea19127414348039709
+      size: 313025
+    - path: data/splits/fold_3_val.csv
+      hash: md5
+      md5: a96b1903c992a2bdd11f1fd57aa9f6f6
+      size: 80951
+    - path: data/splits/fold_4_train.csv
+      hash: md5
+      md5: fc2d3f7b490354b010c0f1a872ddb1f0
+      size: 311308
+    - path: data/splits/fold_4_val.csv
+      hash: md5
+      md5: 2280acb805a439663eb4e8a756e42c1a
+      size: 82668
+    - path: src/data/split/check_patient_leakage.py
+      hash: md5
+      md5: be2089fe9f94ab4117e2e285c57961d3
+      size: 1507
