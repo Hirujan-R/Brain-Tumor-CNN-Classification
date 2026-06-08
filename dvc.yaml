@@ -71,3 +71,11 @@ stages:
       - data/splits/fold_4_val.csv
     outs:
       - data/processed
+
+  validate_dataset:
+    cmd: python src/datasets/validate_dataset.py
+    deps:
+      - src/datasets
+      - data/processed
+    outs:
+      - reports/dataset_validation_report.json

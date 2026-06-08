@@ -218,3 +218,21 @@ stages:
       md5: 1943652868dd2594ae326ceecf2469dd.dir
       size: 1845753984
       nfiles: 3067
+  validate_dataset:
+    cmd: python src/datasets/validate_dataset.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 1943652868dd2594ae326ceecf2469dd.dir
+      size: 1845753984
+      nfiles: 3067
+    - path: src/datasets
+      hash: md5
+      md5: cb4f02b76d92c4332ad313eb4748c90e.dir
+      size: 56629
+      nfiles: 12
+    outs:
+    - path: reports/dataset_validation_report.json
+      hash: md5
+      md5: 106aa8abeac0040c0830c1272448394d
+      size: 808
