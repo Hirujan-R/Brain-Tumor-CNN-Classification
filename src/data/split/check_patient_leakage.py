@@ -1,7 +1,12 @@
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
 import pandas as pd
 
 N_FOLDS = 5
 SPLIT_DIR = "data/splits"
+REPORT_PATH = Path(SPLIT_DIR) / "leakage_report.json"
 
 val_dfs = []
 leakage_cases = []
@@ -39,6 +44,33 @@ if leakage_cases:
 
 if not multi_val_fold_patients.empty:
     print("Example multi-fold patients:", multi_val_fold_patients.head(10).to_dict())
+
+report = {
+    "checked_at": datetime.now(timezone.utc).isoformat(),
+    "num_folds": N_FOLDS,
+    "patients": int(val_df["patient_id"].nunique()),
+    "validation_samples": int(len(val_df)),
+    "train_val_leakage_cases": int(len(leakage_cases)),
+    "patients_in_multiple_validation_folds": int(len(multi_val_fold_patients)),
+    "samples_in_multiple_validation_folds": int(len(multi_val_fold_samples)),
+    "status": "failed"
+    if leakage_cases
+    or not multi_val_fold_patients.empty
+    or not multi_val_fold_samples.empty
+    else "passed",
+    "example_train_val_leakage": [
+        {"fold": int(fold), "patient_id": str(pid)}
+        for fold, pid in leakage_cases[:10]
+    ],
+    "example_multi_fold_patients": {
+        str(pid): int(count)
+        for pid, count in multi_val_fold_patients.head(10).to_dict().items()
+    },
+}
+
+REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+with open(REPORT_PATH, "w") as handle:
+    json.dump(report, handle, indent=4)
 
 if leakage_cases or not multi_val_fold_patients.empty or not multi_val_fold_samples.empty:
     raise SystemExit(1)

@@ -50,3 +50,24 @@ stages:
       - data/splits/fold_3_val.csv
       - data/splits/fold_4_train.csv
       - data/splits/fold_4_val.csv
+    outs:
+      - data/splits/leakage_report.json
+
+  preprocess:
+    cmd: python src/preprocessing/preprocess.py
+    deps:
+      - src/preprocessing
+      - data/ingested/index.csv
+      - data/splits/leakage_report.json
+      - data/splits/fold_0_train.csv
+      - data/splits/fold_0_val.csv
+      - data/splits/fold_1_train.csv
+      - data/splits/fold_1_val.csv
+      - data/splits/fold_2_train.csv
+      - data/splits/fold_2_val.csv
+      - data/splits/fold_3_train.csv
+      - data/splits/fold_3_val.csv
+      - data/splits/fold_4_train.csv
+      - data/splits/fold_4_val.csv
+    outs:
+      - data/processed
