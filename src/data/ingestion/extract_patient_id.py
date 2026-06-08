@@ -1,38 +1,20 @@
-from pathlib import Path
-import re
-from typing import Optional
+import numpy as np
+import h5py
 
+def decode_pid(pid_array):
+    pid_array = np.array(pid_array).squeeze()
+    return "".join([chr(int(x)) for x in pid_array]).strip()
 
 def extract_patient_id(filepath: str) -> str:
     """
-    Extract patient ID from file path.
-
-    Strategy:
-    - Try filename pattern first
-    - Fallback to parent folder
-    - Final fallback: stable hash-like fallback
+    Extracts and decodes patient ID from MATLAB .mat file
     """
 
-    path = Path(filepath)
+    with h5py.File(filepath, "r") as f:
+        cjdata = f["cjdata"]
 
-    filename = path.stem  # without .mat
+        pid_raw = cjdata["PID"][()]
 
-    # ----------------------------
-    # Strategy 1: numeric ID in filename
-    # e.g., 00123.mat → 00123
-    # ----------------------------
-    match = re.search(r"\d+", filename)
-    if match:
-        return match.group(0)
+        patient_id = decode_pid(pid_raw)
 
-    # ----------------------------
-    # Strategy 2: parent folder name
-    # ----------------------------
-    parent = path.parent.name
-    if parent and parent != "extracted_mat":
-        return parent
-
-    # ----------------------------
-    # Strategy 3: fallback (last resort)
-    # ----------------------------
-    return filename
+        return patient_id

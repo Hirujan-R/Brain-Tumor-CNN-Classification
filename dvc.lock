@@ -24,23 +24,23 @@ stages:
       nfiles: 3064
     - path: src/data/ingestion
       hash: md5
-      md5: bf868d70b8c3533f142b549ddad8f541.dir
-      size: 25822
+      md5: ccf9e47440ae6f541feb86814463c67a.dir
+      size: 25111
       nfiles: 16
     outs:
     - path: data/ingested/dataset_summary.json
       hash: md5
-      md5: 9798dc5c43b5f02136f1d71d093a502f
-      size: 69
+      md5: f79b124fb5e668592bf51a1f93295a24
+      size: 68
     - path: data/ingested/index.csv
       hash: md5
-      md5: 7d6c88e5bcf3b4e697d66b6209b2d54e
-      size: 377769
+      md5: 2ca8190f9cecfd50788f2524a908fd50
+      size: 387791
     - path: data/ingested/label_stats.json
       hash: md5
       md5: 50c190d17c1794f1e4d8a076b559329e
       size: 39
     - path: data/ingested/patient_map.json
       hash: md5
-      md5: 3795ebb4012a0a4a758ed137734cac34
-      size: 371596
+      md5: 882cc98c8cde193b1e8704a305a90af3
+      size: 328011

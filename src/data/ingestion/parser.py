@@ -31,12 +31,6 @@ def parse_mat_file(filepath: str) -> Dict[str, Any]:
         # ----------------------------
         pid = np.array(cjdata["PID"]).squeeze()
 
-        # convert bytes → string if needed
-        try:
-            pid = pid.decode() if isinstance(pid, bytes) else str(pid)
-        except Exception:
-            pid = str(pid)
-
         # ----------------------------
         # MASK (optional)
         # ----------------------------
