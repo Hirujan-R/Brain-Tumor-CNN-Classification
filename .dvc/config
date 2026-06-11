@@ -1,0 +1,5 @@
+[core]
+    remote = s3remote
+['remote "s3remote"']
+    url = s3://brain-tumor-cnn-classification-project/dvc
+    region = us-east-1

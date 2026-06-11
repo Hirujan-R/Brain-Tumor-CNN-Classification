@@ -49,4 +49,4 @@ experiments/mlflow/
 *.zip
 
 # DVC internal
-.dvc/
+.dvc/cache
