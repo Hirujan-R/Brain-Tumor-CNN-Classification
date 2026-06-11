@@ -19,12 +19,12 @@ if src_dir not in sys.path:
 if os.path.join(src_dir, 'models') not in sys.path:
     sys.path.append(os.path.join(src_dir, 'models'))
 
-from datasets.dataset_utils import create_fold_datasets, make_dataloader
-from models.cnn_baseline import CNNBaseline
-from models.googlenet import GoogLeNetBrainTumor
-from models.transfer_models import PretrainedFeatureExtractor, SVMTrainerWrapper
-from training.loss import get_weighted_loss
-from training.trainer import Trainer
+from src.datasets.dataset_utils import create_fold_datasets, make_dataloader
+from src.models.cnn_baseline import CNNBaseline
+from src.models.googlenet import GoogLeNetBrainTumor
+from src.models.transfer_models import PretrainedFeatureExtractor, SVMTrainerWrapper
+from src.training.loss import get_weighted_loss
+from src.training.trainer import Trainer
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run 5-Fold Cross Validation Training Pipeline")
@@ -54,7 +54,7 @@ def compute_class_counts(train_dataset):
     for idx in range(len(train_dataset)):
         # Check label using registry directly to be fast
         row = train_dataset.registry.iloc[idx]
-        from datasets.label_mapping import encode_label
+        from src.datasets.label_mapping import encode_label
         label = encode_label(row['label'])
         counts[label] += 1
     return counts
@@ -161,12 +161,12 @@ def main():
                     f.write(buf.read())
 
                 # log_artifact with artifact_path keeps it inside the *current* (child) run's folder
-                mlflow.log_artifact(cm_path, artifact_path=f"fold_{fold}")
+                mlflow.log_artifact(cm_path, artifact_path=f"{args.model}_fold_{fold}")
 
                 # --- Model: save as .pth and log to child run ---
                 model_path = f"/tmp/fold_{fold}_model.pth"
                 torch.save(model.state_dict(), model_path)
-                mlflow.log_artifact(model_path, artifact_path=f"fold_{fold}")
+                mlflow.log_artifact(model_path, artifact_path=f"{args.model}_fold_{fold}")
                 
         # Aggregate OOF Performance
         mean_acc = np.mean(oof_accuracies)
