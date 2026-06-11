@@ -32,9 +32,7 @@ class ModelCheckpoint:
         
         # Initialize best metric
         self.best_metric = float('inf') if mode == 'min' else -float('inf')
-        
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(os.path.abspath(self.filepath)), exist_ok=True)
+    
 
     def step(
         self, 
@@ -65,7 +63,7 @@ class ModelCheckpoint:
             
         if is_best:
             if self.verbose:
-                print(f"[Checkpoint] Epoch {epoch}: {self.monitor} improved from {self.best_metric:.4f} to {current_metric:.4f}. Saving model to {self.filepath}")
+                print(f"[Checkpoint] Epoch {epoch}: {self.monitor} improved from {self.best_metric:.4f} to {current_metric:.4f}.")
             
             self.best_metric = current_metric
             
@@ -80,7 +78,6 @@ class ModelCheckpoint:
             if scheduler is not None:
                 state['scheduler_state_dict'] = scheduler.state_dict()
                 
-            torch.save(state, self.filepath)
             return True
             
         return False

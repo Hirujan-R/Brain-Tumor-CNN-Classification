@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from typing import Dict, Any, Tuple
 import numpy as np
+from sklearn.metrics import f1_score
 
 class Evaluator:
     """
@@ -70,12 +71,15 @@ class Evaluator:
         avg_loss = total_loss / total_samples
         accuracy = correct_predictions / total_samples
         
-        metrics = {
-            "loss": avg_loss,
-            "accuracy": accuracy
-        }
-        
         preds_arr = np.concatenate(all_preds)
         targets_arr = np.concatenate(all_targets)
+        
+        f1 = f1_score(targets_arr, preds_arr, average='macro')
+        
+        metrics = {
+            "loss": avg_loss,
+            "accuracy": accuracy,
+            "f1": f1
+        }
         
         return metrics, preds_arr, targets_arr

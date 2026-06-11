@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 from typing import Dict, Any, Optional
+import io
 
 try:
     from .evaluator import Evaluator
@@ -24,8 +25,7 @@ class Trainer:
         optimizer: Optimizer,
         scheduler: Optional[LRScheduler],
         criterion: nn.Module,
-        device: torch.device,
-        checkpoint_dir: str = "models"
+        device: torch.device
     ):
         self.model = model
         self.train_loader = train_loader
@@ -39,7 +39,7 @@ class Trainer:
         
         # We will save the best model based on validation loss by default
         self.checkpointer = ModelCheckpoint(
-            filepath=f"{checkpoint_dir}/best_model.pth",
+            filepath=f"best_model.pth",
             monitor='val_loss',
             mode='min'
         )
@@ -97,25 +97,32 @@ class Trainer:
         Returns:
             history (Dict): Dictionary tracking training and validation metrics over epochs.
         """
+        import mlflow
+
         history = {
             'train_loss': [],
             'val_loss': [],
             'val_accuracy': [],
-            'lr': []
+            'val_f1': [],
+            'lr': [],
+            'best_preds': None,
+            'best_targets': None
         }
         
         print(f"Starting training for {num_epochs} epochs on device: {self.device}")
         
+
         for epoch in range(1, num_epochs + 1):
             # Train
             train_loss = self.train_epoch()
             
             # Evaluate
-            val_metrics, _, _ = self.evaluator.evaluate(self.val_loader)
+            val_metrics, preds_arr, targets_arr = self.evaluator.evaluate(self.val_loader)
             val_loss = val_metrics['loss']
             val_acc = val_metrics['accuracy']
+            val_f1 = val_metrics['f1']
             
-            # Step the scheduler (CosineAnnealingLR typically steps per epoch)
+            # Step the scheduler
             if self.scheduler is not None:
                 self.scheduler.step()
                 
@@ -125,16 +132,28 @@ class Trainer:
                   f"Train Loss: {train_loss:.4f} - "
                   f"Val Loss: {val_loss:.4f} - "
                   f"Val Acc: {val_acc*100:.2f}% - "
+                  f"Val F1: {val_f1:.4f} - "
                   f"LR: {current_lr:.6f}")
                   
             # Record history
             history['train_loss'].append(train_loss)
             history['val_loss'].append(val_loss)
             history['val_accuracy'].append(val_acc)
+            history['val_f1'].append(val_f1)
             history['lr'].append(current_lr)
             
+            # MLflow logging per epoch
+            if mlflow.active_run():
+                mlflow.log_metrics({
+                    "train_loss": train_loss,
+                    "val_loss": val_loss,
+                    "val_accuracy": val_acc,
+                    "val_f1": val_f1,
+                    "lr": current_lr
+                }, step=epoch)
+            
             # Checkpoint
-            self.checkpointer.step(
+            is_best = self.checkpointer.step(
                 current_metric=val_loss,
                 model=self.model,
                 epoch=epoch,
@@ -142,5 +161,10 @@ class Trainer:
                 scheduler=self.scheduler
             )
             
+            if is_best:
+                history["best_preds"] = preds_arr
+                history["best_targets"] = targets_arr
+            
         print("Training completed.")
+            
         return history

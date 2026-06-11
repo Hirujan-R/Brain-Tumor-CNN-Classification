@@ -67,10 +67,9 @@ def test_transfer_models():
     dummy_loader = torch.utils.data.DataLoader(DummyDataset(), batch_size=4)
     
     svm_wrapper = SVMTrainerWrapper(feature_extractor=extractor)
-    svm_wrapper.train(dummy_loader)
     
-    accuracy = svm_wrapper.evaluate(dummy_loader)
-    print(f"[OK] SVMTrainerWrapper evaluated successfully with acc {accuracy:.2f}")
+    history = svm_wrapper.fit(dummy_loader, dummy_loader)
+    print(f"[OK] SVMTrainerWrapper evaluated successfully with acc {history["val_accuracy"][0]:.2f}")
 
 if __name__ == "__main__":
     test_cnn_baseline()
