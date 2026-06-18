@@ -28,7 +28,7 @@ from src.training.trainer import Trainer
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run 5-Fold Cross Validation Training Pipeline")
-    parser.add_argument("--model", type=str, default="cnn_baseline", choices=["cnn_baseline", "googlenet", "resnet18+svm"])
+    parser.add_argument("--model", type=str, default="cnn_baseline", choices=["cnn_baseline", "googlenet", "resnet18+svm", "googlenet+svm", "vgg19+svm"])
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)

@@ -26,7 +26,7 @@ class PretrainedFeatureExtractor(BrainTumorModel):
             self.model = googlenet(weights=GoogLeNet_Weights.DEFAULT)
             self.feature_dim = self.model.fc.in_features
             self.model.fc = nn.Identity()
-        elif base_model_name.lower() == "vgg16":
+        elif base_model_name.lower() == "vgg19":
             self.model = vgg19(weights=VGG19_Weights.DEFAULT)
             self.feature_dim = 4096
             self.model.classifier = nn.Sequential(
