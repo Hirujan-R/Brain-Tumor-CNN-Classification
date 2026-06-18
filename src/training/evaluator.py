@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from typing import Dict, Any, Tuple
 import numpy as np
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
 
 class Evaluator:
     """
@@ -31,6 +31,7 @@ class Evaluator:
         
         all_preds = []
         all_targets = []
+        all_probs = []
         
         with torch.no_grad():
             for batch in dataloader:
@@ -54,6 +55,8 @@ class Evaluator:
                 else:
                     logits = outputs
                     
+                probs = torch.softmax(logits, dim=1)
+                all_probs.append(probs.cpu().numpy())
                 # Compute loss
                 loss = self.criterion(logits, labels)
                 
@@ -73,13 +76,25 @@ class Evaluator:
         
         preds_arr = np.concatenate(all_preds)
         targets_arr = np.concatenate(all_targets)
+        probs_arr = np.concatenate(all_probs)
         
         f1 = f1_score(targets_arr, preds_arr, average='macro')
+        precision = precision_score(targets_arr, preds_arr, average="weighted")
+        recall = recall_score(targets_arr, preds_arr, average="weighted")
+        roc_auc = roc_auc_score(
+            targets_arr,
+            probs_arr,
+            multi_class="ovr",
+            average="weighted"
+        )
         
         metrics = {
             "loss": avg_loss,
             "accuracy": accuracy,
-            "f1": f1
+            "f1": f1,
+            "precision": precision,
+            "recall": recall,
+            "roc_auc": roc_auc
         }
         
         return metrics, preds_arr, targets_arr

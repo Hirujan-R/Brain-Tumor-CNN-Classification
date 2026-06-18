@@ -39,9 +39,9 @@ def test_googlenet():
     print(f"[OK] GoogLeNet (eval) output shape: {outputs_eval.shape}")
     print(f"[OK] GoogLeNet parameters: {model.count_parameters()}")
 
-def test_transfer_models():
+def test_transfer_models(base_model_name):
     print("\nTesting PretrainedFeatureExtractor & SVMTrainerWrapper...")
-    extractor = PretrainedFeatureExtractor(base_model_name="resnet18")
+    extractor = PretrainedFeatureExtractor(base_model_name=base_model_name)
     
     # Check freezing
     trainable_params = extractor.count_parameters()
@@ -49,8 +49,14 @@ def test_transfer_models():
     
     dummy_input = torch.randn(4, 3, 224, 224)
     features = extractor(dummy_input)
-    # ResNet18 fc layer in_features is 512
-    assert features.shape == (4, 512), f"Expected (4, 512), got {features.shape}"
+    if base_model_name == "resnet18":
+        expected_dim = 512
+    elif base_model_name == "googlenet":
+        expected_dim = 1024
+    elif base_model_name in ["vgg16", "vgg19"]:
+        expected_dim = 4096
+
+    assert features.shape == (4, expected_dim), f"Expected {expected_dim}, got {features.shape}"
     print(f"[OK] PretrainedFeatureExtractor output shape: {features.shape}")
 
     print("\nTesting SVMTrainerWrapper with dummy DataLoader...")
@@ -74,5 +80,5 @@ def test_transfer_models():
 if __name__ == "__main__":
     test_cnn_baseline()
     test_googlenet()
-    test_transfer_models()
+    test_transfer_models(base_model_name="googlenet")
     print("\nAll model architecture tests passed!")

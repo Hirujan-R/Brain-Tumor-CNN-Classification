@@ -35,3 +35,5 @@ ipykernel
 tqdm
 
 h5py
+
+joblib

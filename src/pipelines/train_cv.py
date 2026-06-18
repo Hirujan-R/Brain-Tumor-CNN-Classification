@@ -2,7 +2,6 @@ import argparse
 import os
 import torch
 import mlflow
-import mlflow.pytorch
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
@@ -10,6 +9,7 @@ import numpy as np
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 import io
+import joblib
 
 # Update PYTHONPATH so we can run this from anywhere if needed, or assume it's run from root as `python -m src.pipelines.train_cv`
 import sys
@@ -41,6 +41,12 @@ def get_model(model_name: str, num_classes: int = 3):
         return CNNBaseline(num_classes=num_classes)
     elif model_name == "googlenet":
         return GoogLeNetBrainTumor(num_classes=num_classes, pretrained=True, aux_logits=True)
+    elif model_name == "googlenet+svm":
+        extractor = PretrainedFeatureExtractor(base_model_name="googlenet")
+        return extractor
+    elif model_name == "vgg19+svm":
+        extractor = PretrainedFeatureExtractor(base_model_name="vgg19")
+        return extractor
     elif model_name == "resnet18+svm":
         extractor = PretrainedFeatureExtractor(base_model_name="resnet18")
         return extractor
@@ -68,10 +74,14 @@ def main():
     print(f"Model: {args.model} | Epochs: {args.epochs} | Batch: {args.batch_size} | LR: {args.lr}")
     print(f"Device: {device}")
     
+    mlflow.set_tracking_uri("http://localhost:5000")
     experiment = mlflow.set_experiment("Brain_Tumor_CV")
     
     oof_accuracies = []
     oof_f1_scores = []
+    oof_precision = []
+    oof_recall = []
+    oof_roc_auc = []
     
     # Start Parent Run
     with mlflow.start_run(run_name=f"CV_{args.model}", experiment_id=experiment.experiment_id) as parent_run:
@@ -101,7 +111,7 @@ def main():
                 if hasattr(model, "to"):
                     model = model.to(device)
 
-                if args.model == "resnet18+svm":
+                if args.model == "resnet18+svm" or args.model == "googlenet+svm" or args.model == "vgg19+svm":
                     trainer = SVMTrainerWrapper(model)
                     history = trainer.fit(train_loader=train_loader, val_loader=val_loader)
                 else:
@@ -127,9 +137,15 @@ def main():
                     best_preds = history["best_preds"]
                     best_val_acc = history["val_accuracy"][best_idx]
                     best_val_f1 = history["val_f1"][best_idx]
+                    best_val_precision = history["val_precision"][0]
+                    best_val_recall = history["val_recall"][0]
+                    best_val_roc_auc = history["val_roc_auc"][0]
                 else:
                     best_val_acc = history["val_accuracy"][0]
                     best_val_f1 = history["val_f1"][0]
+                    best_val_precision = history["val_precision"][0]
+                    best_val_recall = history["val_recall"][0]
+                    best_val_roc_auc = history["val_roc_auc"][0]
                     best_targets = history["targets"]
                     best_preds = history["preds"]
                 
@@ -137,10 +153,16 @@ def main():
                 
                 oof_accuracies.append(best_val_acc)
                 oof_f1_scores.append(best_val_f1)
+                oof_precision.append(best_val_precision)
+                oof_recall.append(best_val_recall)
+                oof_roc_auc.append(best_val_roc_auc)
                 
                 mlflow.log_metrics({
                     "fold_best_val_accuracy": best_val_acc,
-                    "fold_best_val_f1": best_val_f1
+                    "fold_best_val_f1": best_val_f1,
+                    "fold_best_val_precision": best_val_precision,
+                    "fold_best_val_recall": best_val_recall,
+                    "fold_best_val_roc_auc": best_val_roc_auc
                 })
 
                 fig, ax = plt.subplots(figsize=(6, 5))
@@ -156,7 +178,7 @@ def main():
                 plt.close(fig)
 
                 # Write to a named temp file so mlflow.log_artifact can pick it up
-                cm_path = f"/tmp/fold_{fold}_confusion_matrix.png"
+                cm_path = f"/tmp/confusion_matrix.png"
                 with open(cm_path, "wb") as f:
                     f.write(buf.read())
 
@@ -164,8 +186,12 @@ def main():
                 mlflow.log_artifact(cm_path, artifact_path=f"{args.model}_fold_{fold}")
 
                 # --- Model: save as .pth and log to child run ---
-                model_path = f"/tmp/fold_{fold}_model.pth"
-                torch.save(model.state_dict(), model_path)
+                if args.model == "resnet18+svm" or args.model == "googlenet+svm" or args.model == "vgg19+svm":
+                    model_path = f"/tmp/svm.pkl"
+                    joblib.dump(trainer.svm, model_path)
+                else:
+                    model_path = f"/tmp/model.pth"
+                    torch.save(model.state_dict(), model_path)
                 mlflow.log_artifact(model_path, artifact_path=f"{args.model}_fold_{fold}")
                 
         # Aggregate OOF Performance
@@ -173,11 +199,20 @@ def main():
         std_acc = np.std(oof_accuracies)
         mean_f1 = np.mean(oof_f1_scores)
         std_f1 = np.std(oof_f1_scores)
+        mean_precision = np.mean(oof_precision)
+        std_precision = np.std(oof_precision)
+        mean_recall = np.mean(oof_recall)
+        std_recall = np.std(oof_recall)
+        mean_roc_auc = np.mean(oof_roc_auc)
+        std_roc_auc = np.std(oof_roc_auc)
         
         print(f"\n{'='*40}")
         print("Cross-Validation Complete!")
         print(f"OOF Accuracy: {mean_acc*100:.2f}% ± {std_acc*100:.2f}%")
         print(f"OOF F1-Score: {mean_f1:.4f} ± {std_f1:.4f}")
+        print(f"OOF Precision: {mean_precision:.4f} ± {mean_f1:.4f}")
+        print(f"OOF Recall: {mean_recall:.4f} ± {mean_recall:.4f}")
+        print(f"OOF ROC-AUC: {mean_roc_auc:.4f} ± {mean_roc_auc:.4f}")
         print(f"{'='*40}")
 
     
@@ -186,7 +221,13 @@ def main():
             "oof_mean_accuracy": mean_acc,
             "oof_std_accuracy": std_acc,
             "oof_mean_f1": mean_f1,
-            "oof_std_f1": std_f1
+            "oof_std_f1": std_f1,
+            "oof_mean_precision": mean_precision,
+            "oof_std_precision": std_precision,
+            "oof_mean_recall": mean_recall,
+            "oof_std_recall": std_recall,
+            "oof_mean_roc_auc": mean_roc_auc,
+            "oof_std_roc_auc": std_roc_auc
         })
 
 if __name__ == "__main__":

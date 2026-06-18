@@ -104,6 +104,9 @@ class Trainer:
             'val_loss': [],
             'val_accuracy': [],
             'val_f1': [],
+            'val_precision': [],
+            'val_recall': [],
+            'val_roc_auc': [],
             'lr': [],
             'best_preds': None,
             'best_targets': None
@@ -121,6 +124,9 @@ class Trainer:
             val_loss = val_metrics['loss']
             val_acc = val_metrics['accuracy']
             val_f1 = val_metrics['f1']
+            val_precision = val_metrics['precision']
+            val_recall = val_metrics['recall']
+            val_roc_auc = val_metrics['roc_auc']
             
             # Step the scheduler
             if self.scheduler is not None:
@@ -140,6 +146,9 @@ class Trainer:
             history['val_loss'].append(val_loss)
             history['val_accuracy'].append(val_acc)
             history['val_f1'].append(val_f1)
+            history['val_precision'].append(val_precision)
+            history['val_recall'].append(val_recall)
+            history['val_roc_auc'].append(val_roc_auc)
             history['lr'].append(current_lr)
             
             # MLflow logging per epoch
@@ -149,6 +158,9 @@ class Trainer:
                     "val_loss": val_loss,
                     "val_accuracy": val_acc,
                     "val_f1": val_f1,
+                    "val_precision": val_precision,
+                    "val_recall": val_recall,
+                    "val_roc_auc": val_roc_auc,
                     "lr": current_lr
                 }, step=epoch)
             

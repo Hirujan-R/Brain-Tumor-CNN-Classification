@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 
 import numpy as np
-from torchvision.models import resnet18, ResNet18_Weights
+from torchvision.models import resnet18, ResNet18_Weights, googlenet, GoogLeNet_Weights, vgg19, VGG19_Weights
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 
 from base_model import BrainTumorModel
 
@@ -20,15 +20,22 @@ class PretrainedFeatureExtractor(BrainTumorModel):
 
         if base_model_name.lower() == "resnet18":
             self.model = resnet18(weights=ResNet18_Weights.DEFAULT)
-
             self.feature_dim = self.model.fc.in_features
             self.model.fc = nn.Identity()
-
+        elif base_model_name.lower() == "googlenet":
+            self.model = googlenet(weights=GoogLeNet_Weights.DEFAULT)
+            self.feature_dim = self.model.fc.in_features
+            self.model.fc = nn.Identity()
+        elif base_model_name.lower() == "vgg16":
+            self.model = vgg19(weights=VGG19_Weights.DEFAULT)
+            self.feature_dim = 4096
+            self.model.classifier = nn.Sequential(
+                *list(self.model.classifier.children())[:-1]
+            )
         else:
             raise NotImplementedError(
                 f"Model {base_model_name} is not implemented."
             )
-
         self.freeze_all_layers()
         self.model.eval()
 
@@ -135,6 +142,7 @@ class SVMTrainerWrapper:
         )
 
         preds = self.svm.predict(X_val)
+        probs = self.svm.predict_proba(X_val)
 
         accuracy = accuracy_score(
             y_val,
@@ -147,12 +155,23 @@ class SVMTrainerWrapper:
             average="weighted",
         )
 
+
+        precision = precision_score(y_val, preds, average="weighted")
+        recall = recall_score(y_val, preds, average="weighted")
+
+        roc_auc = roc_auc_score(
+            y_val,
+            probs,
+            multi_class="ovr",   # one-vs-rest
+            average="weighted"
+        )
+
         print(
             f"Validation Accuracy: "
             f"{accuracy * 100:.2f}%"
         )
 
-        return accuracy, f1, preds, y_val
+        return accuracy, f1, precision, recall, roc_auc, preds, y_val
 
     def fit(
         self,
@@ -167,13 +186,16 @@ class SVMTrainerWrapper:
 
         self.fit_svm(train_loader)
 
-        val_accuracy, val_f1, preds, y_val = self.evaluate_svm(
+        val_accuracy, val_f1, val_precision, val_recall, val_roc_auc, preds, y_val = self.evaluate_svm(
             val_loader
         )
 
         self.history = {
             "val_accuracy": [val_accuracy],
-            "val_f1": [val_f1], 
+            "val_f1": [val_f1],
+            "val_precision": [val_precision],
+            "val_recall": [val_recall], 
+            "val_roc_auc": [val_roc_auc],
             "val_loss": False,
             "targets": y_val.flatten(),
             "preds": preds.flatten()
