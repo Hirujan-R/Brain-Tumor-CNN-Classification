@@ -58,13 +58,11 @@ Deployment
 
 ## Models Evaluated
 
-### Fine-Tuned CNN Architectures
+### CNN Architectures
 
 * GoogLeNet
-* ResNet50
-* DenseNet121
-* EfficientNet-B0
-* ConvNeXt-Tiny
+* ResNet18
+* VGG19
 
 ### Transfer Learning + SVM Architectures
 
@@ -89,10 +87,8 @@ Prediction
 Examples:
 
 * GoogLeNet + SVM
-* ResNet50 + SVM
-* DenseNet121 + SVM
-* EfficientNet-B0 + SVM
-* ConvNeXt-Tiny + SVM
+* ResNet18 + SVM
+* VGG19 + SVM
 
 ---
 
@@ -107,7 +103,6 @@ Examples:
 | Data Versioning            | DVC                 |
 | Cloud Storage              | Amazon S3           |
 | Training Environment       | Google Colab        |
-| Visualization              | Matplotlib, Seaborn |
 | Explainability             | Grad-CAM            |
 | Version Control            | Git, GitHub         |
 
@@ -231,20 +226,16 @@ dvc push
 | Model           | Accuracy | Precision | Recall | F1 Score | ROC-AUC | Training Time |
 | --------------- | -------- | --------- | ------ | -------- | ------- | ------------- |
 | GoogLeNet       |          |           |        |          |         |               |
-| ResNet50        |          |           |        |          |         |               |
-| DenseNet121     |          |           |        |          |         |               |
-| EfficientNet-B0 |          |           |        |          |         |               |
-| ConvNeXt-Tiny   |          |           |        |          |         |               |
+| ResNet18        |          |           |        |          |         |               |
+| VGG19           |          |           |        |          |         |               |
 
 ### Transfer Learning + SVM Architectures
 
 | Model                 | Accuracy | Precision | Recall | F1 Score | ROC-AUC | Training Time |
 | --------------------- | -------- | --------- | ------ | -------- | ------- | ------------- |
 | GoogLeNet + SVM       |          |           |        |          |         |               |
-| ResNet50 + SVM        |          |           |        |          |         |               |
-| DenseNet121 + SVM     |          |           |        |          |         |               |
-| EfficientNet-B0 + SVM |          |           |        |          |         |               |
-| ConvNeXt-Tiny + SVM   |          |           |        |          |         |               |
+| ResNet19 + SVM        |          |           |        |          |         |               |
+| VGG19 + SVM           |          |           |        |          |         |               |
 
 ---
 
