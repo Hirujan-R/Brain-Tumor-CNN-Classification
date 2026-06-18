@@ -22,12 +22,11 @@ The project follows modern MLOps practices including experiment tracking, data v
 
 ## Dataset
 
-The dataset consists of brain MRI scans belonging to four classes:
+The dataset consists of brain MRI scans belonging to three classes:
 
 * Glioma
 * Meningioma
 * Pituitary Tumor
-* No Tumor
 
 ---
 
