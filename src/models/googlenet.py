@@ -1,7 +1,11 @@
 import torch
 import torch.nn as nn
 from torchvision.models import googlenet, GoogLeNet_Weights
-from base_model import BrainTumorModel
+
+try:
+    from .base_model import BrainTumorModel
+except ImportError:
+    from base_model import BrainTumorModel
 
 class GoogLeNetBrainTumor(BrainTumorModel):
     """

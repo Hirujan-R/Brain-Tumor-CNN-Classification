@@ -11,9 +11,19 @@ def generate_gradcam(
     model,
     image_tensor,
     target_class=None,
-    device="cpu"
+    device="cpu",
+    preprocessed=True
 ):
-
+    """
+    Generate GradCAM visualization for a brain tumor image.
+    
+    Args:
+        model: Loaded GoogLeNet model
+        image_tensor: Input image as numpy array (H, W, C)
+        target_class: Target class for visualization (None = use prediction)
+        device: Device to use
+        preprocessed: If True, image is already preprocessed (from .npy)
+    """
     model.eval()
 
     if isinstance(image_tensor, np.ndarray):
@@ -28,20 +38,20 @@ def generate_gradcam(
     input_tensor = image_tensor.permute(2, 0, 1)
     input_tensor = input_tensor.unsqueeze(0).to(device)
 
-    target_layer = model.inception5b.branch3[0]
+    target_layer = model.inception5b
 
     cam = GradCAM(
         model=model,
         target_layers=[target_layer]
     )
 
-    with torch.no_grad():
-        outputs = model(input_tensor)
-        probs = torch.softmax(outputs, dim=1)
-        pred_class = torch.argmax(probs, dim=1).item()
-
     if target_class is None:
-        target_class = pred_class
+        with torch.no_grad():
+            outputs = model(input_tensor)
+            probs = torch.softmax(outputs, dim=1)
+
+            pred_class = torch.argmax(probs, dim=1).item()
+            target_class = pred_class
 
     grayscale_cam = cam(
         input_tensor=input_tensor,
@@ -73,9 +83,6 @@ def visualize_gradcam(image_np, cam):
 
 
 def main():
-    import pandas as pd
-    ddd = pd.read_csv("data/processed/processed_index.csv")
-    
     model = load_model(
         "model/model.pth",
         num_classes=3,
@@ -83,9 +90,8 @@ def main():
     )
 
     image = np.load(
-        "data/processed/images/001102.npy"
+        "data/processed/images/000896.npy"
     )
-    print(image.min(), image.max(), image.mean(), image.std())
 
     cam, probs, pred_class = generate_gradcam(
         model=model,

@@ -27,7 +27,7 @@ from src.preprocessing.image_loader import load_mat_image
 from src.preprocessing.registry import attach_folds, build_fold_map, load_index
 from src.preprocessing.report import write_json
 from src.preprocessing.save_processed import prepare_output_dirs, processed_path, save_processed_image
-from src.preprocessing.transforms import zscore_normalize, minmax_normalize, ensure_grayscale, crop_to_brain, replicate_channels, resize_image
+from src.preprocessing.transforms import zscore_normalize, ensure_grayscale, crop_to_brain, replicate_channels, resize_image
 from src.preprocessing.validation import (
     validate_normalized_image,
     validate_processed_image,
@@ -78,12 +78,7 @@ def main() -> None:
             )
             image = ensure_grayscale(image=image)
 
-            if NORMALIZATION == "zscore":
-                normalized = zscore_normalize(image)
-            elif NORMALIZATION == "minmax":
-                normalized = minmax_normalize(image)
-            else:
-                raise ValueError(f"Unknown normalization: {NORMALIZATION}")
+            normalized = zscore_normalize(image)
 
             validate_normalized_image(normalized, filepath)
 

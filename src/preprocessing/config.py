@@ -7,7 +7,7 @@ TARGET_SHAPE = (TARGET_HEIGHT, TARGET_WIDTH, 3)
 
 EXPECTED_SOURCE_SHAPE = (512, 512)
 
-NORMALIZATION = "minmax"
+NORMALIZATION = "zscore"  # IMPORTANT: Actual preprocessing uses zscore (mean=0, std=1)
 INTERPOLATION = "bilinear"
 OUTPUT_DTYPE = "float32"
 CHANNELS = 3

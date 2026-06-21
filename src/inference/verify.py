@@ -141,6 +141,7 @@ def verify_batch_predictions(
         "total_count": total_count,
         "details": details
     }
+    
 
 def main():
     import argparse
