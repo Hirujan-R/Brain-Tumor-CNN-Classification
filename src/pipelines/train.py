@@ -85,27 +85,25 @@ def main():
         model = model.to(device)
 
     # 1. Datasets
-        processed_index_path = "data/processed/processed_index.csv"
-        registry_df = load_processed_registry(processed_index_path)
-        train_ds = BrainTumorDataset(
-            processed_index_path=processed_index_path,
-            registry_df=registry_df,
-            return_metadata=False,
-            validate_files=True
-        )
-        val_ds = BrainTumorDataset(
-            processed_index_path=processed_index_path,
-            registry_df=registry_df[-1],
-            return_metadata=False,
-            validate_files=True
-        )
-        train_loader = make_dataloader(train_ds, batch_size=args.batch_size, shuffle=True)
-        val_loader = make_dataloader(val_ds, batch_size=args.batch_size, shuffle=True)
+    processed_index_path = "data/processed/processed_index.csv"
+    registry_df = load_processed_registry(processed_index_path)
+    train_ds = BrainTumorDataset(
+        processed_index_path=processed_index_path,
+        registry_df=registry_df,
+        return_metadata=False,
+        validate_files=True
+    )
+
+    train_loader = make_dataloader(train_ds, batch_size=args.batch_size, shuffle=True)
+    val_loader = make_dataloader(train_ds, batch_size=args.batch_size, shuffle=False)
 
     if args.model == "resnet18+svm" or args.model == "googlenet+svm" or args.model == "vgg19+svm":
         trainer = SVMTrainerWrapper(model)
         history = trainer.fit(train_loader=train_loader, val_loader=val_loader)
     else:
+
+        class_counts = compute_class_counts(train_ds)
+        criterion = get_weighted_loss(class_counts, device=device)
         optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         scheduler = CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-6)
         trainer = Trainer(
@@ -117,10 +115,7 @@ def main():
             criterion=criterion,
             device=device
         )
-            
-        # 2. Weighted Loss
-        class_counts = compute_class_counts(train_ds)
-        criterion = get_weighted_loss(class_counts, device=device)
+                    
         
         history = trainer.fit(num_epochs=args.epochs)
             
