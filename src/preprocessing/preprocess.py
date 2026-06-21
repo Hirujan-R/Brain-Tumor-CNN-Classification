@@ -4,7 +4,7 @@ from time import perf_counter
 import pandas as pd
 from tqdm import tqdm
 
-from config import (
+from src.preprocessing.config import (
     CHANNELS,
     CLEAN_OUTPUT,
     EXPECTED_SOURCE_SHAPE,
@@ -23,12 +23,12 @@ from config import (
     TARGET_SHAPE,
     TARGET_WIDTH,
 )
-from image_loader import load_mat_image
-from registry import attach_folds, build_fold_map, load_index
-from report import write_json
-from save_processed import prepare_output_dirs, processed_path, save_processed_image
-from transforms import minmax_normalize, replicate_channels, resize_image
-from validation import (
+from src.preprocessing.image_loader import load_mat_image
+from src.preprocessing.registry import attach_folds, build_fold_map, load_index
+from src.preprocessing.report import write_json
+from src.preprocessing.save_processed import prepare_output_dirs, processed_path, save_processed_image
+from src.preprocessing.transforms import zscore_normalize, ensure_grayscale, crop_to_brain, replicate_channels, resize_image
+from src.preprocessing.validation import (
     validate_normalized_image,
     validate_processed_image,
     validate_raw_image,
@@ -63,6 +63,7 @@ def main() -> None:
 
     prepare_output_dirs(OUTPUT_DIR, IMAGES_DIR, clean=CLEAN_OUTPUT)
 
+
     for _, row in tqdm(
         registry_df.iterrows(),
         total=len(registry_df),
@@ -70,18 +71,23 @@ def main() -> None:
     ):
         filepath = row["filepath"]
         output_path = processed_path(IMAGES_DIR, int(row["image_id"]))
-
         try:
             image = load_mat_image(filepath)
             validation_warnings.extend(
                 validate_raw_image(image, filepath, EXPECTED_SOURCE_SHAPE)
             )
+            image = ensure_grayscale(image=image)
 
-            normalized = minmax_normalize(image)
+            normalized = zscore_normalize(image)
+
             validate_normalized_image(normalized, filepath)
 
+            image = crop_to_brain(image=normalized)
+
+            
+
             resized = resize_image(
-                normalized,
+                image=image,
                 target_height=TARGET_HEIGHT,
                 target_width=TARGET_WIDTH,
                 interpolation=INTERPOLATION,
@@ -100,6 +106,11 @@ def main() -> None:
                     "message": str(exc),
                 }
             )
+    
+    if len(records) == 0:
+        raise RuntimeError(
+            "No images were successfully processed. All records failed validation or pipeline."
+        )
 
     processed_df = pd.DataFrame(records)
     processed_df = processed_df.sort_values("image_id").reset_index(drop=True)

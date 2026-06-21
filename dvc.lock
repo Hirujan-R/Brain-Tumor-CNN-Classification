@@ -157,7 +157,7 @@ stages:
       md5: aacc041199c2ddd905385d871a58d6c9
       size: 358
   preprocess:
-    cmd: python src/preprocessing/preprocess.py
+    cmd: python -m src.preprocessing.preprocess
     deps:
     - path: data/ingested/index.csv
       hash: md5
@@ -209,13 +209,13 @@ stages:
       size: 358
     - path: src/preprocessing
       hash: md5
-      md5: 76b2201a6806ded69d9e4ef68171fd01.dir
-      size: 43406
+      md5: ce5d2dd5d6d6a4dbd9524cb3609252dc.dir
+      size: 57703
       nfiles: 18
     outs:
     - path: data/processed
       hash: md5
-      md5: 1943652868dd2594ae326ceecf2469dd.dir
+      md5: 1f918ee3b7c3414e95874c81ab71642a.dir
       size: 1845753984
       nfiles: 3067
   validate_dataset:
@@ -223,7 +223,7 @@ stages:
     deps:
     - path: data/processed
       hash: md5
-      md5: 1943652868dd2594ae326ceecf2469dd.dir
+      md5: 1f918ee3b7c3414e95874c81ab71642a.dir
       size: 1845753984
       nfiles: 3067
     - path: src/datasets
@@ -234,5 +234,5 @@ stages:
     outs:
     - path: reports/dataset_validation_report.json
       hash: md5
-      md5: 106aa8abeac0040c0830c1272448394d
-      size: 808
+      md5: c665fcd6cd6a7633f1c07e13132baf4a
+      size: 809

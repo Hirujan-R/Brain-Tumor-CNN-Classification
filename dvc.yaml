@@ -54,7 +54,7 @@ stages:
       - data/splits/leakage_report.json
 
   preprocess:
-    cmd: python src/preprocessing/preprocess.py
+    cmd: python -m src.preprocessing.preprocess
     deps:
       - src/preprocessing
       - data/ingested/index.csv

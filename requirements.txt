@@ -37,3 +37,7 @@ tqdm
 h5py
 
 joblib
+
+grad-cam
+
+scipy

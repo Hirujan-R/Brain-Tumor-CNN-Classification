@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from config import FILE_NAME_WIDTH
+from src.preprocessing.config import FILE_NAME_WIDTH
 
 
 def prepare_output_dirs(output_dir: Path, images_dir: Path, clean: bool) -> None:

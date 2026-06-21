@@ -53,16 +53,19 @@ def validate_raw_image(
     return warnings
 
 
-def validate_normalized_image(image: np.ndarray, filepath: str, atol: float = 1e-5) -> None:
+def validate_normalized_image(image: np.ndarray, filepath: str) -> None:
     if image.dtype != np.float32:
-        raise ValidationError(f"{filepath}: normalized image dtype is {image.dtype}")
+        raise ValidationError(f"{filepath}: dtype is {image.dtype}")
 
-    min_value = float(np.min(image))
-    max_value = float(np.max(image))
-    if not np.isclose(min_value, 0.0, atol=atol):
-        raise ValidationError(f"{filepath}: normalized min is {min_value}")
-    if not np.isclose(max_value, 1.0, atol=atol):
-        raise ValidationError(f"{filepath}: normalized max is {max_value}")
+    mean = float(np.mean(image))
+    std = float(np.std(image))
+
+    if std < 1e-6:
+        raise ValidationError(f"{filepath}: near-constant image")
+
+    # optional sanity bounds check (not strict)
+    if np.any(np.isnan(image)) or np.any(np.isinf(image)):
+        raise ValidationError(f"{filepath}: invalid values")
 
 
 def validate_processed_image(
