@@ -22,6 +22,7 @@ if os.path.join(src_dir, 'models') not in sys.path:
     sys.path.append(os.path.join(src_dir, 'models'))
 
 from src.datasets.dataset_utils import create_fold_datasets, make_dataloader
+from sklearn.model_selection import train_test_split
 from src.models.cnn_baseline import CNNBaseline
 from src.models.googlenet import GoogLeNetBrainTumor
 from src.models.transfer_models import PretrainedFeatureExtractor, SVMTrainerWrapper
@@ -87,15 +88,31 @@ def main():
     # 1. Datasets
     processed_index_path = "data/processed/processed_index.csv"
     registry_df = load_processed_registry(processed_index_path)
+    # Create a train/validation split from the processed registry to avoid
+    # validating on the same data used for training (which would inflate metrics).
+    train_df, val_df = train_test_split(
+        registry_df,
+        test_size=0.2,
+        stratify=registry_df["label"],
+        random_state=42,
+    )
+
     train_ds = BrainTumorDataset(
         processed_index_path=processed_index_path,
-        registry_df=registry_df,
+        registry_df=train_df.reset_index(drop=True),
         return_metadata=False,
-        validate_files=True
+        validate_files=True,
+    )
+
+    val_ds = BrainTumorDataset(
+        processed_index_path=processed_index_path,
+        registry_df=val_df.reset_index(drop=True),
+        return_metadata=False,
+        validate_files=True,
     )
 
     train_loader = make_dataloader(train_ds, batch_size=args.batch_size, shuffle=True)
-    val_loader = make_dataloader(train_ds, batch_size=args.batch_size, shuffle=False)
+    val_loader = make_dataloader(val_ds, batch_size=args.batch_size, shuffle=False)
 
     if args.model == "resnet18+svm" or args.model == "googlenet+svm" or args.model == "vgg19+svm":
         trainer = SVMTrainerWrapper(model)

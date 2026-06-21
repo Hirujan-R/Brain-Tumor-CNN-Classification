@@ -30,6 +30,7 @@ def resize_image(
     target_height: int,
     target_width: int,
     interpolation: str,
+    clip_to_0_1: bool = True,
 ) -> np.ndarray:
     if interpolation != "bilinear":
         raise ValueError(f"Unsupported interpolation: {interpolation}")
@@ -40,7 +41,9 @@ def resize_image(
         resample=Image.Resampling.BILINEAR,
     )
     resized_array = np.asarray(resized, dtype=np.float32)
-    return np.clip(resized_array, 0.0, 1.0).astype(np.float32, copy=False)
+    if clip_to_0_1:
+        resized_array = np.clip(resized_array, 0.0, 1.0)
+    return resized_array.astype(np.float32, copy=False)
 
 
 def replicate_channels(image: np.ndarray, channels: int) -> np.ndarray:
