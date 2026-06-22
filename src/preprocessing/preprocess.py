@@ -78,21 +78,21 @@ def main() -> None:
             )
             image = ensure_grayscale(image=image)
 
-            normalized = zscore_normalize(image)
-
-            validate_normalized_image(normalized, filepath)
-
-            image = crop_to_brain(image=normalized)
-
-            
+            image = crop_to_brain(image=image)  # crop on raw values first
 
             resized = resize_image(
                 image=image,
                 target_height=TARGET_HEIGHT,
                 target_width=TARGET_WIDTH,
                 interpolation=INTERPOLATION,
+                clip_to_0_1=False,  # don't clip — we zscore after
             )
-            processed = replicate_channels(resized, CHANNELS)
+
+            normalized = zscore_normalize(resized)  # normalise after resize
+
+            validate_normalized_image(normalized, filepath)
+
+            processed = replicate_channels(normalized, CHANNELS)
             validate_processed_image(processed, filepath, TARGET_SHAPE)
 
             save_processed_image(processed, output_path)

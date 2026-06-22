@@ -130,9 +130,24 @@ def main():
         history = trainer.fit(train_loader=train_loader, val_loader=val_loader)
     else:
 
-        # Use standard CrossEntropyLoss (no class weights - they caused bias toward specific classes)
-        criterion = nn.CrossEntropyLoss()
-        optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+        class_counts = compute_class_counts(train_ds)
+        print(f"Class counts: {class_counts}")
+        total = sum(class_counts.values())
+        weights = torch.tensor([
+            total / (3.0 * class_counts[i]) for i in range(3)
+        ], dtype=torch.float32).to(device)
+        print(f"Class weights: {weights}")
+        criterion = nn.CrossEntropyLoss(weight=weights, label_smoothing=0.1)
+
+        for name, param in model.named_parameters():
+            if 'fc' not in name and 'aux' not in name:
+                param.requires_grad = False
+
+        optimizer = AdamW(
+            filter(lambda p: p.requires_grad, model.parameters()),
+            lr=1e-3,
+            weight_decay=args.weight_decay
+        )
         scheduler = CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-6)
         trainer = Trainer(
             model=model,
@@ -143,6 +158,18 @@ def main():
             criterion=criterion,
             device=device
         )
+
+        # Unfreeze full model after 10 epochs for fine-tuning
+        def unfreeze_callback(epoch):
+            if epoch == 10:
+                print("Unfreezing full model for fine-tuning...")
+                for param in model.parameters():
+                    param.requires_grad = True
+                # Reset optimizer with lower LR for full model
+                for pg in optimizer.param_groups:
+                    pg['lr'] = args.lr  # back to 1e-4
+
+        trainer.epoch_callback = unfreeze_callback
                     
         
         history = trainer.fit(num_epochs=args.epochs)

@@ -140,13 +140,5 @@ class BrainTumorDataset(Dataset):
         if not torch.isfinite(tensor).all():
             raise ValueError(f"{processed_path}: tensor contains NaN or Inf")
 
-        min_value = float(tensor.min())
-        max_value = float(tensor.max())
-        if min_value < -1e-6 or max_value > 1.0 + 1e-6:
-            raise ValueError(
-                f"{processed_path}: tensor values outside [0, 1], "
-                f"min={min_value}, max={max_value}"
-            )
-
         if label not in {0, 1, 2}:
             raise ValueError(f"{processed_path}: invalid model label {label}")

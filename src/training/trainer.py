@@ -44,8 +44,10 @@ class Trainer:
             mode='min'
         )
 
-    def train_epoch(self) -> float:
+    def train_epoch(self, epoch: int = 0) -> float:
         """Runs a single epoch of training."""
+        if hasattr(self, 'epoch_callback') and self.epoch_callback:
+            self.epoch_callback(epoch)
         self.model.train()
         total_loss = 0.0
         total_samples = 0
@@ -117,7 +119,7 @@ class Trainer:
 
         for epoch in range(1, num_epochs + 1):
             # Train
-            train_loss = self.train_epoch()
+            train_loss = self.train_epoch(epoch=epoch)
             
             # Evaluate
             val_metrics, preds_arr, targets_arr = self.evaluator.evaluate(self.val_loader)
