@@ -260,8 +260,8 @@ Transfer learning approaches using CNN feature extraction and SVM classification
 
 | Approach                     | Advantages                                                     | Disadvantages                                    |
 | ---------------------------- | -------------------------------------------------------------- | ------------------------------------------------ |
-| Fine-Tuned CNNs              | Highest predictive performance, task-specific feature learning | Longer training times, higher computational cost |
-| CNN Feature Extraction + SVM | Faster training, lower computational requirements              | Lower predictive performance                     |
+| Fine-Tuned CNNs              | Highest predictive performance, task-specific feature learning, model explainability using Grad-CAM | Longer training times, higher computational cost |
+| CNN Feature Extraction + SVM | Faster training, lower computational requirements              | Lower predictive performance, Cannot use Grad-CAM for model explainability |
 
 ### Conclusion
 
