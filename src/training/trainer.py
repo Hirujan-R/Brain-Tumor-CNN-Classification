@@ -181,6 +181,8 @@ class Trainer:
             if is_best:
                 history["best_preds"] = preds_arr
                 history["best_targets"] = targets_arr
+                torch.save(self.model.state_dict(), "/tmp/best_epoch.pth")
+                print(f"Model also saved to: /tmp/best_epoch.pth")
             
         print("Training completed.")
             
