@@ -132,7 +132,10 @@ class Trainer:
             
             # Step the scheduler
             if self.scheduler is not None:
-                self.scheduler.step()
+                if isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                    self.scheduler.step(val_loss)
+                else:
+                    self.scheduler.step()
                 
             current_lr = self.optimizer.param_groups[0]['lr']
             

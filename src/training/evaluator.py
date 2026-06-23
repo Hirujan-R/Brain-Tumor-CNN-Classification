@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from typing import Dict, Any, Tuple
 import numpy as np
-from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, balanced_accuracy_score
 
 class Evaluator:
     """
@@ -72,12 +72,12 @@ class Evaluator:
                 all_targets.append(labels.cpu().numpy())
                 
         avg_loss = total_loss / total_samples
-        from sklearn.metrics import balanced_accuracy_score
-        accuracy = balanced_accuracy_score(targets_arr, preds_arr)
         
         preds_arr = np.concatenate(all_preds)
         targets_arr = np.concatenate(all_targets)
         probs_arr = np.concatenate(all_probs)
+
+        accuracy = balanced_accuracy_score(targets_arr, preds_arr)
         
         f1 = f1_score(targets_arr, preds_arr, average='macro')
         precision = precision_score(targets_arr, preds_arr, average="weighted")
