@@ -271,11 +271,6 @@ Fine-tuned CNN architectures achieved the strongest classification performance a
 
 ## Future Improvements
 
-* Vision Transformers (ViT)
-* Self-Supervised Learning
-* Ensemble Learning
-* Hyperparameter Optimization
-* ONNX Export
 * Docker Deployment
 * FastAPI Inference Service
 * Streamlit Application
