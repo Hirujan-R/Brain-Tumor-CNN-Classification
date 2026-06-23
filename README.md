@@ -1,6 +1,8 @@
 # Brain Tumor Classification Using Deep Learning and Transfer Learning
 
 <img width="224" height="224" alt="000500" src="https://github.com/user-attachments/assets/ed6fcae7-a56b-46ee-8b10-3cd932f6a580" />
+<img width="224" height="224" alt="000111" src="https://github.com/user-attachments/assets/c847865a-3882-489f-a60e-7207c0256bb2" />
+<img width="224" height="224" alt="001111" src="https://github.com/user-attachments/assets/de3790fa-9dca-493c-ac90-96fa40958b8d" />
 
 
 ## Overview
