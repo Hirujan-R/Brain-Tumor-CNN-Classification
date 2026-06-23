@@ -4,12 +4,14 @@ import numpy as np
 from src.models.googlenet import GoogLeNetBrainTumor
 
 def load_model(model_path="model/model.pth", num_classes=3, device="cpu"):
-    # Instantiate the exact same class used at training time
-    model = GoogLeNetBrainTumor(num_classes=num_classes, pretrained=False, aux_logits=True)
+    # pretrained=True is needed to set transform_input=True on the underlying GoogLeNet
+    # (torchvision only sets transform_input=True when pretrained weights are used).
+    # Without it, the hardcoded input transformation baked into the GoogLeNet forward
+    # pass is skipped, producing different results than training.
+    model = GoogLeNetBrainTumor(num_classes=num_classes, pretrained=True, aux_logits=True)
     
     state_dict = torch.load(model_path, map_location=device, weights_only=True)
     
-    # The .pth has "model." prefix because GoogLeNetBrainTumor uses self.model internally.
     # Load directly — no key manipulation needed.
     model.load_state_dict(state_dict, strict=True)
     
@@ -41,22 +43,3 @@ def predict(model, image_tensor, device="cpu"):
         pred_class = torch.argmax(probs, dim=1).item()
 
     return pred_class, probs.squeeze().cpu().numpy()
-
-
-def main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-
-    model = load_model(
-        "model/model.pth",
-        num_classes=3,
-        device=device
-    )
-    image_tensor = np.load("data/processed/images/000001.npy")
-
-    pred, probs = predict(model, image_tensor=image_tensor, device=device)
-    print(f"Predicted class: {pred}")
-    print(f"Probabilities: {probs}")  
-
-
-if __name__ == "__main__":
-    main()

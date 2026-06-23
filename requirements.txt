@@ -38,6 +38,6 @@ h5py
 
 joblib
 
-grad-cam
+pytorch-grad-cam
 
 scipy

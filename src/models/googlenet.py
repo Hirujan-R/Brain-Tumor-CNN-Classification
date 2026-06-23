@@ -24,7 +24,7 @@ class GoogLeNetBrainTumor(BrainTumorModel):
         # retain the exact pretrained auxiliary heads, but we can override and ignore them later.
         # For training from scratch, we typically want aux_logits to help with vanishing gradients.
         # But if the user specifies False, we respect that.
-        self.model = googlenet(weights=weights, aux_logits=aux_logits)
+        self.model = googlenet(weights=weights, aux_logits=aux_logits, transform_input=True)
         
         # The original output is 1000 classes (ImageNet). We need to change the final fully connected layers.
         

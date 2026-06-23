@@ -50,3 +50,6 @@ experiments/mlflow/
 
 # DVC internal
 .dvc/cache
+
+# Artifacts
+*.pth
