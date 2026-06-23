@@ -1,5 +1,8 @@
 # Brain Tumor Classification Using Deep Learning and Transfer Learning
 
+<img width="224" height="224" alt="000500" src="https://github.com/user-attachments/assets/ed6fcae7-a56b-46ee-8b10-3cd932f6a580" />
+
+
 ## Overview
 
 This project investigates the effectiveness of multiple deep learning architectures for brain tumor classification from MRI images. The study compares end-to-end fine-tuned Convolutional Neural Networks (CNNs) against transfer learning approaches that use pretrained CNNs as feature extractors combined with Support Vector Machine (SVM) classifiers.
