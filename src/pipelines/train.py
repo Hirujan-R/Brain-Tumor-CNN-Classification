@@ -114,7 +114,7 @@ def main():
         validate_files=True
     )
 
-    # Add data augmentation for training (helps generalization with limited data)
+    # Add data augmentation for training (no normalization — images are z-score normalized)
     from torchvision import transforms
     train_transform = transforms.Compose([
         transforms.RandomHorizontalFlip(p=0.5),
@@ -175,9 +175,14 @@ def main():
                 print("Unfreezing full model for fine-tuning...")
                 for param in model.parameters():
                     param.requires_grad = True
-                # Reset optimizer with lower LR for full model
-                for pg in optimizer.param_groups:
-                    pg['lr'] = args.lr  # back to 1e-4
+                # Recreate optimizer with ALL model parameters (not just head)
+                new_opt = AdamW(
+                    model.parameters(),
+                    lr=args.lr,
+                    weight_decay=args.weight_decay
+                )
+                optimizer.param_groups = new_opt.param_groups
+                optimizer.state = new_opt.state
 
         trainer.epoch_callback = unfreeze_callback
                     
