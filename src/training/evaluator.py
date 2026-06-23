@@ -72,7 +72,8 @@ class Evaluator:
                 all_targets.append(labels.cpu().numpy())
                 
         avg_loss = total_loss / total_samples
-        accuracy = correct_predictions / total_samples
+        from sklearn.metrics import balanced_accuracy_score
+        accuracy = balanced_accuracy_score(targets_arr, preds_arr)
         
         preds_arr = np.concatenate(all_preds)
         targets_arr = np.concatenate(all_targets)

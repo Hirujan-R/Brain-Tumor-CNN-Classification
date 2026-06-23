@@ -133,9 +133,12 @@ def main():
         class_counts = compute_class_counts(train_ds)
         print(f"Class counts: {class_counts}")
         total = sum(class_counts.values())
-        weights = torch.tensor([
+        inv_freq = torch.tensor([
             total / (3.0 * class_counts[i]) for i in range(3)
-        ], dtype=torch.float32).to(device)
+        ], dtype=torch.float32)
+        weights = inv_freq ** 2
+        weights = weights / weights.sum() * 3  # keep scale normalised
+        weights = weights.to(device)
         print(f"Class weights: {weights}")
         criterion = nn.CrossEntropyLoss(weight=weights, label_smoothing=0.1)
 
@@ -154,8 +157,7 @@ def main():
             mode='min',          
             factor=0.5,          
             patience=10,         
-            min_lr=1e-6,
-            verbose=True
+            min_lr=1e-6
         )
         trainer = Trainer(
             model=model,
