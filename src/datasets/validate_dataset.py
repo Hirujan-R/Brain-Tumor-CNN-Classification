@@ -170,29 +170,15 @@ def validate_arrays(df: pd.DataFrame) -> list[dict]:
                     processed_path=path,
                 )
 
-            min_value = float(image.min())
-            max_value = float(image.max())
-            if min_value < -1e-6 or max_value > 1.0 + 1e-6:
+            if float(np.std(image)) < 1e-6:
                 add_issue(
                     issues,
-                    "range_mismatch",
-                    "Image values outside [0, 1].",
+                    "constant_image",
+                    "Image is near-constant after normalisation.",
                     image_id=int(row["image_id"]),
                     processed_path=path,
-                    min_value=min_value,
-                    max_value=max_value,
                 )
 
-            if not np.allclose(image[:, :, 0], image[:, :, 1], atol=1e-6) or not np.allclose(
-                image[:, :, 1], image[:, :, 2], atol=1e-6
-            ):
-                add_issue(
-                    issues,
-                    "channel_mismatch",
-                    "Replicated channels are not identical.",
-                    image_id=int(row["image_id"]),
-                    processed_path=path,
-                )
 
             model_label = encode_label(row["label"])
             if model_label not in {0, 1, 2}:

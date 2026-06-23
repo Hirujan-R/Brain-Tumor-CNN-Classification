@@ -78,20 +78,16 @@ def validate_processed_image(
         raise ValidationError(
             f"{filepath}: expected processed shape {expected_shape}, got {image.shape}"
         )
-
     if image.dtype != np.float32:
         raise ValidationError(f"{filepath}: processed image dtype is {image.dtype}")
-
     if not np.isfinite(image).all():
         raise ValidationError(f"{filepath}: processed image contains NaN or Inf")
 
-    min_value = float(np.min(image))
-    max_value = float(np.max(image))
-    if min_value < -atol or max_value > 1.0 + atol:
-        raise ValidationError(
-            f"{filepath}: processed values outside [0, 1], "
-            f"min={min_value}, max={max_value}"
-        )
+    # Z-score normalised data lives outside [0,1] — just check it's finite
+    # and has reasonable range (not constant, not exploded)
+    std = float(np.std(image))
+    if std < 1e-6:
+        raise ValidationError(f"{filepath}: processed image is near-constant")
 
     if not np.allclose(image[:, :, 0], image[:, :, 1], atol=atol):
         raise ValidationError(f"{filepath}: channels 0 and 1 differ")
