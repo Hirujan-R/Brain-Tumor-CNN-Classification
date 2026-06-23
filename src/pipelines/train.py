@@ -148,7 +148,15 @@ def main():
             lr=1e-3,
             weight_decay=args.weight_decay
         )
-        scheduler = CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-6)
+        from torch.optim.lr_scheduler import ReduceLROnPlateau
+        scheduler = ReduceLROnPlateau(
+            optimizer,
+            mode='min',          
+            factor=0.5,          
+            patience=10,         
+            min_lr=1e-6,
+            verbose=True
+        )
         trainer = Trainer(
             model=model,
             train_loader=train_loader,
