@@ -87,12 +87,11 @@ def main() -> None:
 
     with st.sidebar:
         st.header("Model")
-        arch = st.selectbox(
-            "Architecture (default = strongest)",
-            options=[name for name, _ in ranked],
-            index=[name for name, _ in ranked].index(default_model),
-        )
+        # The dashboard always predicts with the strongest model; every other
+        # architecture is still shown in the "all architectures" table below.
+        arch = default_model
         info = models[arch]
+        st.write(f"**Predicting with:** `{arch}` (strongest)")
         st.write(f"**Checkpoint:** `fold {info['fold']}`")
         if info["accuracy"] is not None:
             st.metric("5-fold CV accuracy", f"{info['accuracy'] * 100:.2f}%")
@@ -139,7 +138,7 @@ def main() -> None:
         st.image(display_image(image), caption=source, width="stretch")
 
     with col_pred:
-        st.subheader("Prediction")
+        st.subheader(f"Prediction — {arch} (strongest)")
         model = _load_model(arch, str(info["path"]), device)
         result = predict_with_model(
             model, arch, image, device=device, checkpoint=str(info["path"])
@@ -191,40 +190,44 @@ def main() -> None:
         st.dataframe(ranking, width="stretch", hide_index=True)
 
     st.divider()
-    st.subheader("Model ranking on this image (weakest → strongest by CV accuracy)")
+    st.subheader("Predictions from all architectures (weakest → strongest by CV accuracy)")
     st.caption(
-        "Each available fine-tuned CNN runs on the uploaded image. "
-        "Transfer-learning (features + SVM) models are omitted because their "
-        "SVM artifacts are not saved by the training pipeline."
+        "The dashboard always predicts with the strongest model (left panel), but "
+        "every available fine-tuned CNN is run on the uploaded image for comparison. "
+        "Transfer-learning (features + SVM) models are omitted because their SVM "
+        "artifacts are not saved by the training pipeline."
     )
 
     model_rows = []
-    progress = st.progress(0.0, text="Running all models...")
+    progress = st.progress(0.0, text="Running all architectures...")
     model_items = list(ranked)
+    classes = result["classes"]
     for index, (name, model_info) in enumerate(model_items):
         try:
             each_model = _load_model(name, str(model_info["path"]), device)
             each_result = predict_with_model(
                 each_model, name, image, device=device, checkpoint=str(model_info["path"])
             )
-            model_rows.append(
-                {
-                    "model": name,
-                    "cv_accuracy": model_info["accuracy"],
-                    "predicted_class": each_result["predicted_class"],
-                    "confidence": max(each_result["probabilities"]),
-                    "agrees_with_top_model": each_result["predicted_class"]
-                    == result["predicted_class"],
-                }
-            )
+            row = {
+                "model": name,
+                "cv_accuracy": model_info["accuracy"],
+                "prediction": each_result["predicted_class"],
+                "confidence": float(max(each_result["probabilities"])),
+                "agrees": each_result["predicted_class"] == result["predicted_class"],
+            }
+            for class_name, probability in zip(
+                each_result["classes"], each_result["probabilities"]
+            ):
+                row[f"p_{class_name}"] = float(probability)
+            model_rows.append(row)
         except Exception as exc:  # pragma: no cover
             model_rows.append(
                 {
                     "model": name,
                     "cv_accuracy": model_info["accuracy"],
-                    "predicted_class": f"error: {exc}",
+                    "prediction": f"error: {exc}",
                     "confidence": None,
-                    "agrees_with_top_model": False,
+                    "agrees": False,
                 }
             )
         progress.progress((index + 1) / len(model_items), text=f"Ran {name}")
@@ -232,6 +235,18 @@ def main() -> None:
 
     model_table = pd.DataFrame(model_rows).sort_values(
         "cv_accuracy", ascending=True, na_position="first"
+    )
+    for class_name in classes:
+        column = f"p_{class_name}"
+        if column in model_table:
+            model_table[column] = model_table[column].map(
+                lambda value: f"{value * 100:.1f}%" if isinstance(value, float) else value
+            )
+    model_table = model_table.rename(
+        columns={
+            **{f"p_{class_name}": f"P({class_name})" for class_name in classes},
+            "agrees": f"agrees_with_{arch}",
+        }
     )
     model_table["cv_accuracy"] = model_table["cv_accuracy"].map(
         lambda value: f"{value * 100:.2f}%" if value is not None else "n/a"

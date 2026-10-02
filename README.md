@@ -350,8 +350,9 @@ compute is limited.
 ## Interactive Dashboard
 
 An interactive Streamlit dashboard lets you upload an MRI image and get a prediction
-from the strongest model (**ResNet18**), a Grad-CAM heatmap, a probability breakdown
-for each class, and a model ranking.
+from the strongest model (**ResNet18**, locked as the prediction model), a Grad-CAM
+heatmap, a per-class probability breakdown, and a comparison table showing the
+prediction and class probabilities from **all** fine-tuned architectures.
 
 ```bash
 pip install streamlit
