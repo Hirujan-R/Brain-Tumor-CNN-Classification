@@ -1,0 +1,32 @@
+name: brain-tumor-cnn
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - pyyaml
+  - tqdm
+  - h5py
+  - pip:
+      - torch
+      - torchvision
+      - torchaudio
+      - opencv-python
+      - Pillow
+      - dvc[s3]
+      - mlflow
+      - fastapi
+      - uvicorn
+      - jupyter
+      - ipykernel
+      - joblib
+      - pytorch-grad-cam
+      - scipy

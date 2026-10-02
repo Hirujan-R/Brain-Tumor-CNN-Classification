@@ -3,14 +3,23 @@ from typing import List, Dict, Tuple
 
 import pandas as pd
 
-# Import your modular layers
-from config import IngestionConfig
-from loader import discover_mat_files
-from parser import parse_mat_file
-from validation import validate_sample
-from extract_patient_id import extract_patient_id
-from create_registry_outputs import create_registry_outputs
-from persistence import persist_outputs
+# Import your modular layers (supports both `python -m ...` and direct script runs)
+try:
+    from .config import IngestionConfig
+    from .loader import discover_mat_files
+    from .parser import parse_mat_file
+    from .validation import validate_sample
+    from .extract_patient_id import extract_patient_id
+    from .create_registry_outputs import create_registry_outputs
+    from .persistence import persist_outputs
+except ImportError:
+    from config import IngestionConfig
+    from loader import discover_mat_files
+    from parser import parse_mat_file
+    from validation import validate_sample
+    from extract_patient_id import extract_patient_id
+    from create_registry_outputs import create_registry_outputs
+    from persistence import persist_outputs
 
 
 # ----------------------------

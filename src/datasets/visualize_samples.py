@@ -59,7 +59,7 @@ def main() -> None:
     for axis, index in zip(axes, indices):
         image, label, metadata = dataset[index]
         image_hwc = image.permute(1, 2, 0).numpy()
-        axis.imshow(image_hwc[:, :, 0], cmap="gray", vmin=0.0, vmax=1.0)
+        axis.imshow(image_hwc[:, :, 0], cmap="gray")
         axis.set_title(
             f"{decode_label(int(label))}\n"
             f"patient={metadata['patient_id']} fold={metadata['fold']}",

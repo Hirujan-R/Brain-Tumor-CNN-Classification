@@ -1,0 +1,12 @@
+# DVC / S3 remote configuration.
+# The same values are stored in .dvc/config for the DVC CLI.
+
+remote:
+  name: s3remote
+  url: s3://brain-tumor-cnn-classification-project/dvc
+  region: us-east-1
+
+# Credentials are provided via environment variables (never commit secrets):
+#   AWS_ACCESS_KEY_ID
+#   AWS_SECRET_ACCESS_KEY
+#   AWS_DEFAULT_REGION

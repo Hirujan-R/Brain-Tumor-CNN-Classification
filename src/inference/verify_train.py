@@ -18,9 +18,15 @@ from src.inference.predict import load_model, predict
 from src.datasets.label_mapping import encode_label, MODEL_LABEL_TO_CLASS_NAME
 
 
-def verify_all(model_path: str, processed_index_path: str, device: str = "cpu", out_csv: str | None = None):
+def verify_all(
+    model_path: str,
+    processed_index_path: str,
+    device: str = "cpu",
+    out_csv: str | None = None,
+    arch: str = "googlenet",
+):
     print(f"Loading model from: {model_path}")
-    model = load_model(model_path, device=device)
+    model = load_model(model_path, arch=arch, device=device)
 
     df = pd.read_csv(processed_index_path)
     n = len(df)
@@ -35,9 +41,9 @@ def verify_all(model_path: str, processed_index_path: str, device: str = "cpu", 
         true_label = encode_label(true_label_original)
 
         img = np.load(path)
-        # predict() returns (pred_class, probs) in the current implementation
-        pred_class, probs = predict(model, img, device=device)
-        pred = int(pred_class)
+        result = predict(model, img, device=device)
+        pred = int(result["predicted_label"])
+        probs = result["probabilities"]
 
         y_true.append(true_label)
         y_pred.append(pred)
@@ -87,10 +93,17 @@ def main():
     parser.add_argument("--index", type=str, default="data/processed/processed_index.csv", help="Path to processed index CSV")
     parser.add_argument("--device", type=str, default="cpu", help="Device to use (cpu or cuda)")
     parser.add_argument("--out", type=str, default=None, help="CSV path to write mismatches")
+    parser.add_argument("--arch", type=str, default="googlenet", help="Model architecture")
 
     args = parser.parse_args()
 
-    verify_all(model_path=args.model, processed_index_path=args.index, device=args.device, out_csv=args.out)
+    verify_all(
+        model_path=args.model,
+        processed_index_path=args.index,
+        device=args.device,
+        out_csv=args.out,
+        arch=args.arch,
+    )
 
 
 if __name__ == "__main__":

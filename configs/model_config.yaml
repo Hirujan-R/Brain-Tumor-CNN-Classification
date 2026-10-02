@@ -1,0 +1,21 @@
+# Supported model architectures.
+
+fine_tune_models:
+  - cnn_baseline
+  - googlenet
+  - resnet18
+  - vgg19
+
+transfer_svm_models:
+  - googlenet+svm
+  - resnet18+svm
+  - vgg19+svm
+
+defaults:
+  model: googlenet
+  pretrained: true
+  aux_logits: true
+
+svm:
+  kernel: rbf
+  C: 1.0

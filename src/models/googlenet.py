@@ -14,6 +14,9 @@ class GoogLeNetBrainTumor(BrainTumorModel):
     fully reproduce training from scratch as requested, but allows using
     pre-trained weights if desired.
     """
+
+    HEAD_PREFIXES = ("model.fc", "model.aux1", "model.aux2")
+
     def __init__(self, num_classes: int = 3, pretrained: bool = False, aux_logits: bool = True):
         super().__init__()
         

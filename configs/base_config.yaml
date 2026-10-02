@@ -1,0 +1,28 @@
+# Base project configuration (reference defaults used by the pipelines).
+
+project:
+  name: Brain-Tumor-CNN-Classification
+  seed: 42
+
+paths:
+  processed_index: data/processed/processed_index.csv
+  reports_dir: reports
+  checkpoints_dir: reports/checkpoints
+  model_dir: model
+
+data:
+  image_height: 224
+  image_width: 224
+  channels: 3
+  num_classes: 3
+  num_folds: 5
+  label_mapping:
+    glioma: 0
+    meningioma: 1
+    pituitary: 2
+
+labels:
+  original:
+    1: meningioma
+    2: glioma
+    3: pituitary

@@ -8,12 +8,24 @@ from src.inference.predict import load_model
 from src.datasets.label_mapping import MODEL_LABEL_TO_CLASS_NAME
 
 
+def get_target_layer(model, arch="googlenet"):
+    """Return the last convolutional layer for a given architecture."""
+    if arch.startswith("googlenet"):
+        return model.model.inception5b
+    if arch.startswith("resnet18"):
+        return model.model.layer4[-1]
+    if arch.startswith("vgg19"):
+        return model.model.features[-1]
+    raise ValueError(f"No Grad-CAM target layer defined for arch: {arch}")
+
+
 def generate_gradcam(
     model,
     image_tensor,
     target_class=None,
     device="cpu",
-    preprocessed=True
+    preprocessed=True,
+    arch="googlenet",
 ):
     """
     Generate GradCAM visualization for a brain tumor image.
@@ -39,8 +51,8 @@ def generate_gradcam(
     input_tensor = image_tensor.permute(2, 0, 1)
     input_tensor = input_tensor.unsqueeze(0).to(device)
 
-    # GoogLeNetBrainTumor wraps the actual GoogLeNet in self.model
-    target_layer = model.model.inception5b
+    # The wrapper stores the torchvision model under `self.model`
+    target_layer = get_target_layer(model, arch=arch)
 
     cam = GradCAM(
         model=model,

@@ -1,0 +1,19 @@
+# Training configuration (reference defaults for `src.pipelines.train`).
+
+training:
+  epochs: 30
+  batch_size: 32
+  learning_rate: 1.0e-4
+  head_learning_rate: 1.0e-3
+  weight_decay: 1.0e-2
+  label_smoothing: 0.1
+  unfreeze_epoch: 5
+  lr_patience: 5
+  folds: 5
+  num_workers: 0
+  device: auto
+
+mlflow:
+  enabled: false
+  tracking_uri: null
+  experiment_name: Brain_Tumor_CV

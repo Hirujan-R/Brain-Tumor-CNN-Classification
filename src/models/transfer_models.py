@@ -6,7 +6,10 @@ from torchvision.models import resnet18, ResNet18_Weights, googlenet, GoogLeNet_
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 
-from base_model import BrainTumorModel
+try:
+    from .base_model import BrainTumorModel
+except ImportError:
+    from base_model import BrainTumorModel
 
 
 class PretrainedFeatureExtractor(BrainTumorModel):
@@ -130,7 +133,7 @@ class SVMTrainerWrapper:
     def evaluate_svm(
         self,
         val_loader,
-    ) -> tuple[float, float]:
+    ) -> tuple:
 
         if not self.is_fitted:
             raise RuntimeError(

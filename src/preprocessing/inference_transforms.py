@@ -1,10 +1,26 @@
 """
 Inference-time preprocessing transforms that match training preprocessing.
 
-CRITICAL: This module ensures inference uses the SAME preprocessing pipeline as training.
+CRITICAL: This module ensures inference uses the SAME preprocessing pipeline as
+training (see ``src/preprocessing/preprocess.py``).
+
+Training order:
+    1. grayscale
+    2. crop to brain (on raw values)
+    3. resize
+    4. z-score normalize
+    5. replicate to 3 channels
 """
+
 import numpy as np
-from src.preprocessing.transforms import zscore_normalize, ensure_grayscale, crop_to_brain, replicate_channels, resize_image
+
+from src.preprocessing.transforms import (
+    crop_to_brain,
+    ensure_grayscale,
+    replicate_channels,
+    resize_image,
+    zscore_normalize,
+)
 
 
 def preprocess_for_inference(
@@ -15,42 +31,27 @@ def preprocess_for_inference(
 ) -> np.ndarray:
     """
     Apply the EXACT same preprocessing pipeline used during training.
-    
-    Pipeline:
-    1. Ensure grayscale
-    2. Z-score normalization (NOT min-max!)
-    3. Crop to brain region
-    4. Resize to target dimensions
-    5. Replicate to 3 channels
-    
-    Args:
-        image: Raw loaded image (can be 2D or 3D)
-        target_height: Target height (default 224)
-        target_width: Target width (default 224)
-        channels: Number of output channels (default 3)
-    
+
     Returns:
-        Preprocessed image array with shape (H, W, C) ready for model input
+        Preprocessed image array with shape (H, W, C) ready for model input.
     """
     # Step 1: Convert to grayscale if needed
     image = ensure_grayscale(image)
-    
-    # Step 2: Z-score normalization (CRITICAL - matches training!)
-    normalized = zscore_normalize(image)
-    
-    # Step 3: Crop to brain region
-    cropped = crop_to_brain(image=normalized)
-    
-    # Step 4: Resize to target dimensions
+
+    # Step 2: Crop to brain region (on raw values)
+    cropped = crop_to_brain(image=image)
+
+    # Step 3: Resize to target dimensions (do NOT clip - z-score follows)
     resized = resize_image(
         image=cropped,
         target_height=target_height,
         target_width=target_width,
         interpolation="bilinear",
-        clip_to_0_1=False  # Important: don't clip z-score normalized values!
+        clip_to_0_1=False,
     )
-    
+
+    # Step 4: Z-score normalization (matches training)
+    normalized = zscore_normalize(resized)
+
     # Step 5: Replicate to 3 channels
-    processed = replicate_channels(resized, channels)
-    
-    return processed
+    return replicate_channels(normalized, channels)
