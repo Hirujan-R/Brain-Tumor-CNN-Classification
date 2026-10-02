@@ -15,7 +15,9 @@ def get_target_layer(model, arch="googlenet"):
     if arch.startswith("resnet18"):
         return model.model.layer4[-1]
     if arch.startswith("vgg19"):
-        return model.model.features[-1]
+        # last convolutional block (features[-1] is just MaxPool and gives
+        # below-chance localization; the last Conv2d is features[-3])
+        return model.model.features[-3]
     if arch.startswith("cnn_baseline"):
         # last Conv2d block in the hand-built feature extractor
         return model.features[12]
