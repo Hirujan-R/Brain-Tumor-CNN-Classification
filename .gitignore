@@ -33,6 +33,10 @@ data/splits/*
 models/checkpoints/
 models/final/
 
+# Training results / checkpoints copied back from Colab (large binaries, kept in S3)
+brain_tumor_results/
+reports/checkpoints/
+
 # MLflow
 mlruns/
 experiments/mlflow/

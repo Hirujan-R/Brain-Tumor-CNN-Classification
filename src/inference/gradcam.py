@@ -16,6 +16,9 @@ def get_target_layer(model, arch="googlenet"):
         return model.model.layer4[-1]
     if arch.startswith("vgg19"):
         return model.model.features[-1]
+    if arch.startswith("cnn_baseline"):
+        # last Conv2d block in the hand-built feature extractor
+        return model.features[12]
     raise ValueError(f"No Grad-CAM target layer defined for arch: {arch}")
 
 

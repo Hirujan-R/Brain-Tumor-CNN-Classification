@@ -1,0 +1,10 @@
+[server]
+# The repository contains large result/checkpoint folders; disabling the file
+# watcher avoids slow startup scans and is fine for this dashboard.
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+primaryColor = "#2a6fdb"
