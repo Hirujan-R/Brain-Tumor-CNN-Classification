@@ -354,6 +354,8 @@ from the strongest model (**ResNet18**, locked as the prediction model), a Grad-
 heatmap, a per-class probability breakdown, and a comparison table showing the
 prediction and class probabilities from **all** fine-tuned architectures.
 
+![Brain tumor classification dashboard](assets/dashboard.png)
+
 ```bash
 pip install streamlit
 streamlit run dashboard/app.py
