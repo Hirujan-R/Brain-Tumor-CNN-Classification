@@ -50,6 +50,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num-samples", type=int, default=40)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--method", default="auto", help="CAM method (auto, gradcam, gradcam++, xgradcam, hirescam, layercam)")
     parser.add_argument("--output-dir", default="brain_tumor_results/gradcam_eval")
     parser.add_argument("--crop-threshold", type=float, default=0.05)
     return parser.parse_args()
@@ -245,7 +246,12 @@ def main() -> None:
             model = loaded[name]
             try:
                 cam, _, _ = generate_gradcam(
-                    model, processed, target_class=true_label, device=args.device, arch=name
+                    model,
+                    processed,
+                    target_class=true_label,
+                    device=args.device,
+                    arch=name,
+                    method=args.method,
                 )
                 metrics = cam_metrics(cam, mask)
                 if metrics is None:

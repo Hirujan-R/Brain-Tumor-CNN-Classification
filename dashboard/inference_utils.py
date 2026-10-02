@@ -218,11 +218,11 @@ def predict_image(
     return predict_with_model(model, arch, image, device=device, checkpoint=str(path))
 
 
-def gradcam_overlay(model, arch: str, image: np.ndarray, device: str = "cpu"):
-    """Return an RGB Grad-CAM overlay for a (H, W, 3) image (or None)."""
+def gradcam_overlay(model, arch: str, image: np.ndarray, device: str = "cpu", method: str = "auto"):
+    """Return an RGB CAM overlay for a (H, W, 3) image (or None)."""
     from pytorch_grad_cam.utils.image import show_cam_on_image
 
-    cam, _, _ = generate_gradcam(model, image, arch=arch, device=device)
+    cam, _, _ = generate_gradcam(model, image, arch=arch, device=device, method=method)
     base = display_image(image)
     overlay = show_cam_on_image(base, cam, use_rgb=True)
     return overlay

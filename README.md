@@ -286,20 +286,28 @@ Grad-CAM heatmaps were scored against the ground-truth tumor masks (the raw
 `tumorMask` field, warped through the same crop/resize as training) over 50 images
 using `scripts/evaluate_gradcam.py`:
 
-| Model        | Pointing accuracy | CAM energy in mask | ROC-AUC |
-| ------------ | ----------------- | ------------------ | ------- |
-| GoogLeNet    | 0.10              | 0.058              | 0.894   |
-| ResNet18     | 0.20              | 0.045              | 0.893   |
-| CNN Baseline | 0.10              | 0.039              | 0.659   |
-| VGG19        | 0.08              | 0.028              | 0.520   |
+| Model        | Pointing accuracy | CAM energy in mask | ROC-AUC (best method) |
+| ------------ | ----------------- | ------------------ | --------------------- |
+| ResNet18     | 0.22              | 0.051              | 0.925 (Grad-CAM++)    |
+| GoogLeNet    | 0.10              | 0.058              | 0.894 (Grad-CAM)      |
+| CNN Baseline | 0.08              | 0.069              | 0.725 (Grad-CAM++)    |
+| VGG19        | 0.06              | 0.034              | 0.561 (Grad-CAM++)    |
 
 High classification accuracy does **not** imply correct localization: every model puts
-only ~3–6% of its CAM mass inside the tumor and its peak pixel lands on the lesion only
-8–20% of the time. GoogLeNet and ResNet18 localize best (ROC-AUC ≈ 0.89), the
-from-scratch baseline is weaker (≈ 0.66) and VGG19 is near chance (≈ 0.52). The heatmaps
-are broad and architecture-dependent, i.e. these classifiers rely on global context
-rather than the lesion. Target-layer choice matters: VGG19's final MaxPool gave
-below-chance localization (AUC 0.48) and was changed to the last convolution.
+only ~3–7% of its CAM mass inside the tumor and its peak pixel lands on the lesion only
+6–22% of the time. ResNet18 and GoogLeNet localize best (ROC-AUC ≈ 0.89–0.93), the
+from-scratch baseline is weaker (≈ 0.73) and VGG19 is near chance (≈ 0.56). The heatmaps
+are broad and architecture-dependent, i.e. these classifiers lean on global context
+rather than the lesion.
+
+VGG19 is a clear attribution failure: ~48% of its CAM mass falls **outside the head**
+(vs ~16–21% for the other models), and no CAM variant fixes it (Grad-CAM, Grad-CAM++,
+XGradCAM, HiResCAM and LayerCAM all give tumor ROC-AUC ≈ 0.50–0.56). Background
+occlusion did not change its predictions, so the classifier is not using background as a
+shortcut — its explanation is simply unreliable. The target layer for VGG19 was changed
+from its final MaxPool (below chance) to the last convolution, and the dashboard
+auto-selects the best CAM method per architecture (`gradcam.py`), defaulting to ResNet18
+for explanations.
 
 ---
 

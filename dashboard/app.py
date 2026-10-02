@@ -105,6 +105,15 @@ def main() -> None:
                 device = "cpu"
 
         st.divider()
+        cam_method = st.selectbox(
+            "Explanation method",
+            ["auto", "gradcam++", "gradcam", "xgradcam", "hirescam", "layercam"],
+            index=0,
+            help=(
+                "auto picks the empirically best method per architecture. "
+                "VGG19 localizes poorly regardless of method."
+            ),
+        )
         with st.expander("Available models", expanded=False):
             render_model_table(models)
         st.caption(
@@ -158,10 +167,15 @@ def main() -> None:
             try:
                 from dashboard.inference_utils import gradcam_overlay
 
-                overlay = gradcam_overlay(model, arch, image, device=device)
+                overlay = gradcam_overlay(
+                    model, arch, image, device=device, method=cam_method
+                )
                 st.image(
                     overlay,
-                    caption=f"Grad-CAM for predicted class: {result['predicted_class']}",
+                    caption=(
+                        f"{cam_method} for predicted class: "
+                        f"{result['predicted_class']}"
+                    ),
                     width="stretch",
                 )
             except Exception as exc:  # pragma: no cover

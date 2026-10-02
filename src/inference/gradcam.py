@@ -1,11 +1,42 @@
 import torch
 import numpy as np
-from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam import GradCAM, GradCAMPlusPlus, HiResCAM, LayerCAM, XGradCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 import matplotlib.pyplot as plt
 from src.inference.predict import load_model
 from src.datasets.label_mapping import MODEL_LABEL_TO_CLASS_NAME
+
+
+# Available CAM methods (name -> class)
+CAM_METHODS = {
+    "gradcam": GradCAM,
+    "gradcam++": GradCAMPlusPlus,
+    "xgradcam": XGradCAM,
+    "hirescam": HiResCAM,
+    "layercam": LayerCAM,
+}
+
+DEFAULT_CAM_METHOD = "gradcam++"
+
+# Empirically best method per architecture (see scripts/evaluate_gradcam.py).
+# GoogLeNet localizes better with plain Grad-CAM; ResNet18/VGG19/baseline with Grad-CAM++.
+DEFAULT_CAM_METHOD_BY_ARCH = {
+    "googlenet": "gradcam",
+    "resnet18": "gradcam++",
+    "vgg19": "gradcam++",
+    "cnn_baseline": "gradcam++",
+}
+
+
+def get_cam_method(method: str = DEFAULT_CAM_METHOD):
+    """Resolve a CAM method name to its class (falls back to GradCAM)."""
+    return CAM_METHODS.get(str(method).lower(), GradCAM)
+
+
+def default_method_for(arch: str) -> str:
+    return DEFAULT_CAM_METHOD_BY_ARCH.get(arch, DEFAULT_CAM_METHOD)
+
 
 
 def get_target_layer(model, arch="googlenet"):
@@ -31,18 +62,24 @@ def generate_gradcam(
     device="cpu",
     preprocessed=True,
     arch="googlenet",
+    method: str = None,
 ):
     """
-    Generate GradCAM visualization for a brain tumor image.
-    
+    Generate a CAM visualization for a brain tumor image.
+
     Args:
-        model: Loaded GoogLeNet model
+        model: Loaded classifier
         image_tensor: Input image as numpy array (H, W, C)
         target_class: Target class for visualization (None = use prediction)
         device: Device to use
         preprocessed: If True, image is already preprocessed (from .npy)
+        arch: Architecture name (selects the target layer)
+        method: CAM method name, or None to auto-select per architecture
     """
     model.eval()
+
+    if method is None or str(method).lower() in {"auto", "default"}:
+        method = default_method_for(arch)
 
     if isinstance(image_tensor, np.ndarray):
         image_tensor = torch.tensor(
@@ -59,7 +96,7 @@ def generate_gradcam(
     # The wrapper stores the torchvision model under `self.model`
     target_layer = get_target_layer(model, arch=arch)
 
-    cam = GradCAM(
+    cam = get_cam_method(method)(
         model=model,
         target_layers=[target_layer]
     )
